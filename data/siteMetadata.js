@@ -1,16 +1,16 @@
 const siteMetadata = {
-  title: '',
-  author: '',
+  title: 'Tina Log',
+  author: 'Tina',
   headerTitle: '',
   description: '',
   language: 'ko-KR',
   siteUrl: '',
   siteRepo: '',
-  siteLogo: '/static/images/로고이름.png',
-  image: '/static/images/프로필사진.png',
+  siteLogo: '/static/images/profile.png',
+  image: '/static/images/profile.png',
   socialBanner: '/static/images/social-banner.png',
-  email: '',
-  github: '',
+  email: 'migujeong@gmail.com',
+  github: 'https://github.com/tinajeong',
   linkedin: '',
   locale: 'ko-KR',
   analytics: {
@@ -19,7 +19,7 @@ const siteMetadata = {
   comment: {
     provider: 'utterances',
     utterancesConfig: {
-      repo: '유저네임/레포네임',
+      repo: 'tinajeong/blog-comment',
       issueTerm: 'title',
       label: 'Comment 💬',
       theme: 'github-light',

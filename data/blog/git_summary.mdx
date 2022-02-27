@@ -105,6 +105,10 @@ git config --global alias.ps push
 
 `ls -arthl` 명령어를 통해 숨겨진 `.git` 파일을 확인할 수 있다. 
 
+### 1-1. 새로운 브랜치를 딴다.
+
+> git switch -c bar_branch 
+
 ### 2. bar.js, bar2.js 에 대한 수정을 완료했다.
 
 #### 2-1. 수정사항을 확인한다.
@@ -128,9 +132,19 @@ staging area가 따로 있어서 2번의 반영작업을 거치게 된다.
 방법3) 특정 확장자만 올린다.
 > git add *.js
 
-그외에도 다양한 옵션이 있다.
+그외에도 다양한 옵션이 있다. 
 
+### 2-4 수정사항을 로컬 저장소에 반영한다.
 
+방법1) 커밋 메세지 옵션을 단다.
+> git commit -m "[Fix] bar기능 NPE 에러 해결"
+
+방법2) 커밋 메세지를 쓰는 파일로 반영한다.
+> git commit -F commit_message
+
+### 3. 로컬 저장소의 내용을 원격 저장소에 반영한다.
+
+> git push origin bar_branch
 
 **Reference**
 - [https://youtu.be/Z9dvM7qgN9s](https://youtu.be/Z9dvM7qgN9s)

@@ -85,7 +85,7 @@ git config --global core.autocrlf input
 ```
 
 ### 별칭 만들어서 git 명령어 간략하게 만들기
-별칭을 만드는 이유는..절약(?)을 위함이다. 하루에 git 명령어를 약 50번쯤 친다 가정하면 1년 18250번의 타이핑에서 아주 많은 타이핑을 절약(?) 할수 있다.
+별칭을 만드는 이유는..절약(?)을 위함이다. 하루에 git 명령어를 약 50번쯤 친다 가정하면 1년 18250번의 타이핑에서 아주 많은 타이핑을 절약(?) 할수 있다.`
 
 ```shell
 git config --global alias.st status
@@ -107,45 +107,61 @@ git config --global alias.ps push
 
 ### 1-1. 새로운 브랜치를 딴다.
 
-> git switch -c bar_branch 
+```shell
+git switch -c bar_branch 
+```
 
 ### 2. bar.js, bar2.js 에 대한 수정을 완료했다.
 
 #### 2-1. 수정사항을 확인한다.
-> git diff
 
+```shell
+git diff
+```
 #### + 수정사항을 초기화하고 싶다. (로컬에 기록은 되어있다.)
-> git stash
+
+```shell
+git stash
+```
 
 #### 2-2 수정사항이 반영된 파일들을 확인한다.
-> git status
-
+```shell
+git status
+```
 ### 2-3. 수정사항을 로컬 무대에 올린다.
 staging area가 따로 있어서 2번의 반영작업을 거치게 된다.
 
 방법1) 모든 파일을 올린다.
-> git add -A
+```shell
+git add -A
+```
 
 방법2) 현재 폴더의 파일을 올린다.
-> git add .
+```shell
+git add .
+```
 
 방법3) 특정 확장자만 올린다.
-> git add *.js
-
+```shell
+git add *.js
+```
 그외에도 다양한 옵션이 있다. 
 
 ### 2-4 수정사항을 로컬 저장소에 반영한다.
 
 방법1) 커밋 메세지 옵션을 단다.
-> git commit -m "[Fix] bar기능 NPE 에러 해결"
-
+```shell
+git commit -m "[Fix] bar기능 NPE 에러 해결"
+```
 방법2) 커밋 메세지를 쓰는 파일로 반영한다.
-> git commit -F commit_message
-
+```shell
+git commit -F commit_message
+```
 ### 3. 로컬 저장소의 내용을 원격 저장소에 반영한다.
 
-> git push origin bar_branch
-
+```shell
+git push origin bar_branch
+```
 **Reference**
 - [https://youtu.be/Z9dvM7qgN9s](https://youtu.be/Z9dvM7qgN9s)
 - [https://subicura.com/git/](https://subicura.com/git/)

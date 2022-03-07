@@ -1,0 +1,236 @@
+---
+title: 'Html/CSS 정리하기'
+thumbSrc: '/static/images/html_css.png'
+date: '2022-03-05'
+tags: ['HTML', 'CSS']
+draft: false
+summary: 'Html과 CSS에 대해 개괄적으로 정리합니다.'
+images: ['/static/images/html_css.png']  
+---
+# 📌 목차
+
+![html_css](/static/images/html_css.png)
+
+- **Html?**
+
+---
+<div id="move" onclick="view()" style={{visibility: 'hidden' }}>Hi There!</div>
+
+## Html?
+
+> Hypertext Markup Language
+
+Hypertext는 웹에서 쓰이는 텍스트표현을 의미하며 ex)링크, Markup Language는 구조적 표현이 가능한 언어들을 의미한다. 그래서 html은 웹페이지를 구조적으로 표현하는 언어라고 할 수 있다. html은 태그를 통해 구조를 표현한다.
+
+크롬에서 개발자도구를 켰을때 나오는 소스의 창이 해당 웹페이지의 html이다.
+맥북에선 `alt(option)+command + i`를, 윈도우에서는 `F12` 버튼을 누르면 개발자도구를 킬 수 있다.
+
+### Tag
+
+tag는 시작태그와 끝태그로 이루어지며, 태그는 자식과 부모태그를 가질 수 있다.
+예외적으로, 빈 태그(`empty tag`)도 있는데, 자식 노드를 가질 수 없는 태그들을 의미한다.
+
+> `<input type="">`  
+> `<br>`
+
+### 기본구조
+
+```html
+<!DOCTYPE html> /* (HTML 5 기준)문서의 타입을 명시하는 부분 */
+<html lang="ko">
+  /* html 태그 안에 내용이 모두 포함됨. 웹페이지의 언어를 함께 명시. */
+  <head>
+    /* html 문서의 설정관련 부분 */
+    <meta charset="UTF-8" />
+    /* 인코딩 방식 */
+    <title>탭이름</title>
+    /* 탭에 표시될 웹페이지 타이틀 */
+  </head>
+  <body>
+    /* body 안에 화면에 표시될 내용이 포함됨 */
+    <h1>웹페이지내용</h1>
+  </body>
+</html>
+```
+
+## HTML 태그 종류
+
+### Heading : h
+
+> <h1>제목1</h1>
+<h2>제목2</h2>
+<h3>제목3</h3>
+<h4>제목4</h4>
+<h5>제목5</h5>
+<h6>제목6</h6>
+
+```html
+<h1>제목1</h1>
+<h2>제목2</h2>
+<h3>제목3</h3>
+<h4>제목4</h4>
+<h5>제목5</h5>
+<h6>제목6</h6>
+```
+
+### Paragraph : p
+> <p>단락 나누기</p> <p>단락 나누기</p>  <p>line<br></br>break</p>
+```html
+<p>단락 나누기</p>
+<p>단락 나누기</p>
+<p>line<br>break</p>
+```
+
+### Anchor : a
+
+페이지 이동(html 페이지 내 이동도 가능)을 위해 사용할 수 있는 태그이다. 고로 이동할 페이지를 명시하는 `href` 속성을 반드시 사용해야 한다. target 옵션은 현재창에서 이동할 페이지를 띄울것인지(`_self`), 새로운 창에서 띄울 것인지(`_blank`) 지정할 수 있다.
+
+> <a href="https://blog-tinajeong.vercel.app" target="_blank">
+>   Tinajeong의 블로그
+> </a>
+
+```html
+<a href="https://blog-tinajeong.vercel.app" target="_blank">Tinajeong의 블로그</a>
+```
+
+<b>페이지 내에서 이동하기</b>
+
+> <a href="#move">페이지내에서 이동하기</a>
+
+```html
+<a href="#move">페이지내에서 이동하기</a>
+```
+### Container : div, span
+
+웹페이지의 구조와 표현을 위해 `<div></div>` 와 `<span></span>`을 사용할 수 있다.
+두 태그는 웹페이지 레이아웃이나 표현에 아무런 영향을 미지치 않으며, 브라우저도 별다른 처리를 하지 않는다. 프로그래머의 의도에 따라 스타일이 더해지거나
+구조화를 하기 위해 사용하게 된다.
+
+`div`(division)는 블록레벨 요쇼로, 사용하면 하나의 블록을 새로 사용하고 이전 요소에서 개행시켜 표현하게 되지만, `span` 요소는 하나의 라인 안에서 프로그래머의 의도를 담는데 사용된다.
+
+### Image : img
+
+img도 빈 태그의 일종이며, 이미지의 위치를 나타내는 `src` 속성을 필수로 입력해야 한다.
+
+> <img src="/static/images/html_css.png" alt="html과css" width="210" height="150"></img>
+
+```html
+<img src="/static/images/html_css.png" alt="html과css" width="210" height="150">
+```
+
+### Table
+
+`th` 태그에 table의 제목을, `td`에 태그의 내용을 넣는다. `tr`은 제목과 내용 부분에 모두 쓰일 수 있으며, 테이블의 행을 의미한다.
+
+```
+<table>
+  <caption>테이블 이름</caption>
+  <thead>
+  <tr>
+    <th>타이틀1</th>
+    <th>타이틀2</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>내용1</td>
+    <td>내용2</td>
+  </tr>
+  </tbody>
+</table>
+```
+
+
+### Form
+
+#### input
+
+`type` 속성에 종류를 명시해서 사용한다. 밑에 명시된 것 이외에도 다양한 속성이 있다.
+
+`type="text"`
+
+> <input type="text" placeholder="기본텍스트"></input>
+
+`type="password"`
+
+> <input type="password" placeholder="입력값 마스킹처리"></input>
+
+`type="submit"`  
+다른 페이지에 값을 전달하기 위한 태그이다.
+```
+<form action="./test.html">
+    <input type="submit">
+    <input type="button" value="버튼">
+</form>
+```
+
+### 콘텐츠모델
+
+콘텐츠모델은 html의 작성요소를 분류한것이다. 다음 7가지로 분류된다.
+
+>
+1. Metadata Content
+2. Flow Content
+3. Sectioning Content
+4. Heading Content
+5. Phrasing Content
+6. Embedded Content
+7. Interacitve Content
+
+#### Metadata
+
+콘텐츠 동작, 스타일 등 말그대로 metadata와 관련된 부분이다. 보통 `head` 태그안에 명시된다.
+
+> base, link, meta, noscript, script, style, title
+
+#### Flow
+
+문서 작성중 자연스러운 흐름에 따른 콘텐츠들이며, 대부분의 태그들이 해당한다.
+```
+> a, abbr, address,map>area, article, aside,audio, b, bdo, blockquote,br, button,
+> canvas, cite, code, datalist, del, details, dfn, div, dl, em, embed,
+> fieldset, figure, footer, form, h1 ~ h6, header, hgroup, hr, i, iframe, img,
+> input, ins, kbd, keygen, label, map, mark, math, menu, meter, nav, noscript, object, ol,
+> output, p, pre, progress, q, ruby, samp, script, section, select, small, span, strong,
+> style[scoped], sub, sup, svg, table, textarea, time, ul, var, video, wbr
+```
+#### Sectioning
+
+문서의 구조를 나눌때 사용한다.
+```
+> article, aside, nav, section
+```
+#### Heading
+
+문서의 제목을 명시할 때 사용한다.
+```
+> h1, h2, h3, h4, h5, h6
+```
+#### Phrasing
+
+문단 내부에서 사용된다.
+```
+> a, abbr, map>area, audio, b, bdo, br, button, canvas, cite, code, datalist, del, dfn, em, embed,
+> i, iframe, img, input, ins, kbd, keygen, label, map, mark, math, meter, noscript, object, output,
+> progress, q, ruby, samp, script, select, small, span, strong, sub, sup, svg, textarea, time,
+> var, video, wbr
+```
+### Embedded
+
+html 문서에 끼어든 외부 콘텐츠를 표현할 때 사용된다.
+```
+> audio, canvas, embed, iframe, img, math, object, svg, video
+```
+### Interacitve
+
+웹페이지 사용자와 상호작용이 있는 요소들이다.
+```
+> a, audio[controls], button, details, embed, iframe, img[usemap], input, keygen, label, menu,
+> object[usemap], select, textarea, video[controls]
+```
+발전을 위한 링크
+
+https://www.w3schools.com/tags/tag_meta.asp
+https://developer.mozilla.org/en-US/docs/Web/HTML/Element/colgroup
+https://developer.mozilla.org/en-US/docs/Glossary/Semantics
+

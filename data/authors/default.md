@@ -8,7 +8,7 @@ linkedin: https://www.linkedin.com/in/chanmi-jeong-535630194/
 github: https://github.com/tinajeong
 ---
 
-안녕하세요, 밤을 사랑하는 아침형인간, 티나 🌝 입니다.  
+안녕하세요! 밤을 사랑하는 아침형인간, 티나 🌝 입니다.  
 
 백엔드 개발자로 일하고 있으며, 화면개발도 병행하고 있습니다.  
 

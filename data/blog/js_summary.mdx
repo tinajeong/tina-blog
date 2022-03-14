@@ -249,6 +249,7 @@ const plus2 = (a,b) => {
 ```
 
 > IIFE(Immediately Invoked FUnction Expression)
+
 선언과 동시에 호출하는 표현
 ```javascript
 (function hello() {
@@ -261,8 +262,8 @@ const plus2 = (a,b) => {
 &rarr; class : template vs object : instance of a class 
 
 > javascript class (es 6)
-prototype 기반의 클래스로, 문법적인 편리함을 제공한다는 점에서 차이가 있다.  
 
+prototype 기반의 클래스로, 문법적인 편리함(`syntactic sugar`)을 제공한다는 점에서 차이가 있다.  
 
 > constructor
 ```javascript
@@ -324,6 +325,7 @@ clas Triangle extends Shape {
 그외 추가적인 object의 내용 참고
 
 ## 오브젝트 넌 뭐니?
+
 object는 key와 value의 집합체이다. 
 ```javascript
 const obj1 = {} // object literal
@@ -331,12 +333,14 @@ const obj2 = new Object(); // object constructor
 ```
 
 > computed properties
+
 ```javascript
 console.log(tina['name']); // 어떤 속성이 필요한지 아직 모를 때 사용 
 console.log(tina.name);
 ```
 
 > property value shorthand  
+
 constructor 사용하는 것 추천.
 
 > in operator
@@ -502,7 +506,7 @@ Symbol, 함수 등 js에만 있는 요소들은 배제된 채로 변환된다.
 > Object to json
 ```javascript
 const json = JSON.stringify(val);
-JSON.stringify(val),['name'];
+JSON.stringify(val, ['name']);// 특정한 property만 json으로 변환 시 
 ```
 
 > json to object

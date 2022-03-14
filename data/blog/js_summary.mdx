@@ -582,6 +582,7 @@ Executor는 `Pending` , `Fulfilled`, `Rejected` 세 가지의 상태를 통해 �
 async 와 await 은 Promise를 더 쉽게 사용할 수 있도록 도와주는 ES 6 문법이다. 즉, 가독성 있는 코드 처리를 할 수 있다.
 
 > async
+
 ```javascript
 async function promiseFunction() {
 	return 1; // return Promise.resolve(1);
@@ -592,12 +593,14 @@ promiseFunction().then(result); // 1
 함수 시그니처 앞에 async 키워드를 붙이면 해당 함수는 처리 상태를 가진 프로미스 객체를 반환한다. 다음 코드와 같이 Promise 객체를 반환하지 않아도 Fulfilled Promise로 wrapping해 반환해준다.
 
 > await 
+
 함수 호출부 앞에 await 키워드를 붙이면 호출된 프로미스가 완료 처리될 때까지 기다린다. 아래 코드는 promiseFunction() 의 처리가 완료될 때 까지 기다렸다가 결과를 받아낸다.
 ```javascript
 let result = await promiseFunction();
 ```
 
 > 일반적인 async && await 구조
+
 ```javascript
 async function 함수명() {
   const val1 = await 비동기_처리_메서드_명();

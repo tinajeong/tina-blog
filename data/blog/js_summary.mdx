@@ -1,0 +1,621 @@
+---
+title: 'Javascript 정리하기'
+thumbSrc: '/static/images/javascript.png'
+date: '2022-03-13'
+tags: ['javascript']
+draft: false
+summary: '드림코딩 엘리의 인강을 들으며 관련 내용을 정리합니다.'
+images: ['/static/images/javascript.png']
+---
+
+# 📌 목차
+
+![javascript](/static/images/javascript.png)
+
+- **자바스크립트의 역사와 현재 그리고 미래**
+- **콘솔에 출력, script async 와 defer의 차이점 및 앞으로 자바스크립트 공부 방향**
+- **데이터타입, data types, let vs var, hoisting**
+- **코딩의 기본 operator, if, for loop 코드리뷰 팁**
+- **Arrow Function은 무엇인가? 함수의 선언과 표현**
+- **클래스와 오브젝트의 차이점(class vs object), 객체지향 언어 클래스 정리**
+- **오브젝트 넌 뭐니?**
+- **배열 제대로 알고 쓰자. 자바스크립트 배열 개념과 APIs 총정리**
+- **유용한 10가지 배열 함수들. Array APIs 총정리**
+- **JSON 개념 정리 와 활용방법 및 유용한 사이트 공유 JavaScript JSON**
+- **비동기 처리의 시작 콜백 이해하기, 콜백 지옥 체험 😱 JavaScript Callback**
+- **프로미스 개념부터 활용까지 JavaScript Promise**
+- **비동기의 꽃 JavaScript async 와 await 그리고 유용한 Promise APIs**
+---
+
+인강 출처 : [드림코딩 엘리의 인강](https://youtube.com/playlist?list=PLv2d7VI9OotTVOL4QmPfvJWPJvkmv6h-2)
+
+## 자바스크립트의 역사와 현재 그리고 미래 
+자바스크립트는 html에서 더 나아가 동적인 웹사이트를 만들고자 한 것이 시발점이다. 보편화를 위해 `java+script`로 네이밍 되었다. 그 사이에 다양한 스크립팅 언어가 경쟁하다가, 표준화가 자바스크립트의 중요한 이슈로 떠올랐다. ECMA 라는 기관에서 표준화를 시행하고 있으며, 매년 업데이트 된다. 
+
+결론적으로 자바스크립트는 대중화가 굉장히 잘 되었고, 프론트엔트 뿐 아니라 백엔드, 모바일에서도 쓰인다.
+
+## 콘솔에 출력, script async 와 defer의 차이점 및 앞으로 자바스크립트 공부 방향
+
+> console.log("Hello World!")  
+
+개발자 도구를 키면 콘솔에 프린트되는 것을 확인가능하다. 
+
+> https://developer.mozilla.org/ko/docs/Mozilla  
+
+개발할 때 참고하기 좋은 페이지이다. 
+
+> head + async 옵션  
+```html
+<script async src="main.js"></script>
+```  
+병렬적으로 페이지 로딩이 가능하지만, 조작시점에 관련 요소가 로딩되지 않았을수도 있어 사용자가 기다리는 시간이 발생할 수 있고, 여러개 js파일을 로딩할 때 a파일은 정의가 되고, a파일이 참조하는 b파일은 로딩되지 않았다면 또 문제가 발생할 수 있다.
+
+> head + defer 옵션(best option)  
+
+```html
+<script defer src="main.js"></script>
+```  
+html을 parsing하는 동안 필요한 js파일을 다운로드 하는 방식이다.
+
+> 'use script'  
+
+파일 상단에 기입해 상식적인 범위 안에서 자바스크립트를 사용할 수 있다. 브라우저가 js 파일을 분석하는 시간을 단축해 성능 개선을 기대할 수도 있다.
+
+## 데이터타입, data types, let vs var, hoisting
+
+> let   
+
+es6에 추가된 문법이다. 
+
+```javascript
+// global 변수
+let name = 'tina'
+name = 'migu'
+// local 변수
+{
+    let job = 'developer'
+}
+```
+
+> `hoisting` (not reserved word)
+
+hoisting은 선언 위치와 상관없이 선언을 파일 가장 위로 올려주는 것(hoisting)이다. 고로 var는 위험하기 때문에 사용하지 않아야 한다. let/const도 호이스팅이 일어나지만 block level 안에서 일어난다.
+
+> const
+
+es6에 추가된 문법으로, immutable data type이다. 선언과 동시에 값을 할당하고 다른 값을 대입하면 에러가 발생한다. 일반적으로 const의 사용을 권장한다.
+보안상의 이슈, 스레드 안정성의 문제도 있지만, 사람의 실수를 줄이기 위해 사용한다.
+
+> primitive type vs object type
+
+- primitive : number, string, boolean, null, undefined, symbol
+- object : box container
+- function : first class citizen
+
+> number 
+
+number 타입을 이용해 정수, 실수 상관없이 넣을 수 있다. 
+
+- 1/0 : `Infinity`
+- -1/0 : `-Infinity`
+- 'not a number'/2 : `NaN`
+-> 연산 시 valid한 연산인지 확인해야 한다.
+
+> string
+
+string에서 character, string 상관없이 넣을수 있다. 
+
+- template lieteral : `variable value ${val}` 의 형태로 편리하게 string concat을 이용할 수 있다. 
+
+> null vs undefined
+
+null은 값이 존재하지 않는 상태이고,undefined는 '아직' 값이 없는 상태이다. 
+
+> symbol 
+
+똑같은 값도 unique한 object로 만들어줌. 
+
+```javascript
+Symbol('id') === Symbol('id') //false
+```
+
+> dynamic typing 
+```javascript
+let text = 'type'
+text = 5 
+```
+
+> object 
+```javascript
+const tina = {name:"tina", age:"27"};
+tina.name = "migu";// tina
+```
+const로 선언해도 object 내부의 값을 수정할 수 있다. 내부의 값도 수정이 불가하도록 만드려면 `object.freeze()`를 사용한다. 
+
+## 코딩의 기본 operator, if, for loop 코드리뷰 팁
+
+> string concatenation
+```javascript
+console.log('1'+2)  //12
+```
+
+> numeric operation 
+```javascript
+console.log(1+1);
+console.log(1-1);
+console.log(1*1);
+console.log(1/1);
+console.log(1%1);
+console.log(2**4); // 2^4 
+```
+> logical operator : || , &&, !
+
+- `or` 은 short-circuit임. 헤비한 작업일 수록 나중에 체크하기
+
+> ===: strict equality 
+
+`==`은 타입 변환을 통해 비교하고, `===`은 타입 변환 없이 비교한다. 되도록 strict equality를 사용한다.
+
+```javascript
+console.log('0' == false) // true
+console.log('0' === false) // false
+console.log('' == false) // true
+console.log('' === false) // false
+console.log(undefined == null) // true
+console.log(undefined === null) //false
+console.log(0==null) // false
+console.log(0==undefined) // false
+
+console.log(""==null) // false
+console.log(""==undefined) // false
+```
+
+## Arrow Function은 무엇인가? 함수의 선언과 표현
+javascript의 꽃, 함수! 함수는 subprogram이라고도 불린다. 
+
+> `function name(param1, param2,...) {...return;}`
+
+함수의 네이밍은 동사로 지어야한다. 네이밍이 어렵다면 여러 작업을 한번에 수행하고 있는 중일 수 있다. 그럴 땐, 함수를 나누는 것을 고려한다.
+
+> parameter
+- primitive parameter : pass-by-value
+- object parameter : pass-by-reference 
+
+> default parameter(es 6)  
+
+```javascript
+function showMessage(default message ="hello") {
+    console.log(`${message} received`);
+}
+```
+
+> rest parameter (es 6)
+
+배열형태로 전달되는 파라미터
+```javascript
+function printAll(..args) {
+    for(const arg of args) {
+        console.log(arg);
+    }
+}
+...
+printAll('a','b','c');
+```
+> local scope 
+
+: 밖에서는 안이 보이지 않고, 안에서는 밖이 보인다.
+
+> early return, early access 
+
+파라미터값이 유효하지 않은 경우 로직 앞쪽에 `return`로직을 넣는다. 
+
+> function expression 
+```javascript
+sum(2,3);
+function sum(a,b) {
+    console.log(a+b);
+    return a+b;
+}
+
+
+```
+javascript가 function hoisting을 해주기 때문에 선언 위치 전에 함수 호출을 해도 정상 호출 된다. 
+
+> callback function 
+```javascript
+function randomQuiz(message , printYes, printNo) {
+    if(message === 'i luv u') {
+        printYes();
+    }
+    else {
+        printNo();
+    }
+}
+```
+
+> arrow function (a.k.a 화살표 함수)
+화살표 함수는 항상 이름이 없는 ananymous function 이다. 
+```javascript
+function sum(a,b) {
+    console.log(a+b);
+}
+
+const plus = (a,b) => a+b;
+const plus2 = (a,b) => {
+    a+b;
+    reutrn a+b; // 중괄호를 넣으면 반드시 return 문이 필요함. 
+}
+```
+
+> IIFE(Immediately Invoked FUnction Expression)
+선언과 동시에 호출하는 표현
+```javascript
+(function hello() {
+    console.log("hello");
+})();
+```
+
+## 클래스와 오브젝트의 차이점(class vs object), 객체지향 언어 클래스 정리
+클래스는 연관있는 데이터를 하나로 묶어놓은 틀, 청사진, template이다. 클래스가 실제 생성되어 인스턴스가 된 것을 object라고 한다. 일상의 사물로 객체와 클래스를 정의하는 연습을 하면 좋다.  
+&rarr; class : template vs object : instance of a class 
+
+> javascript class (es 6)
+prototype 기반의 클래스로, 문법적인 편리함을 제공한다는 점에서 차이가 있다.  
+
+
+> constructor
+```javascript
+class Person {
+    constructor (name, age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    speak () {
+        console.log("hello, I'm ${this.name}");
+    }
+}
+
+const tina = new Person("tina","27");
+console.log(tina.name);
+console.log(tinaj.age);
+```
+
+> getter and setter 
+```javascript
+class User {
+    ...
+    get age() {
+        return this._age;
+    }
+    set age(value) {
+        if(value< 0 ) {
+            throw Error ('age cannot be negative');
+        }
+        this._age = value;
+    }
+}
+```
+
+> 상속, 다양성 
+```javascript
+class Shape {
+    constructor (width, height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    getArea () {
+        return this.width * this.height;
+    }
+}
+
+clas Triangle extends Shape {
+    getArea() { // overriding
+        console.log(super.getArea());
+        return this.width * this.heigth /2;
+    }
+}
+```
+
+> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference
+
+그외 추가적인 object의 내용 참고
+
+## 오브젝트 넌 뭐니?
+object는 key와 value의 집합체이다. 
+```javascript
+const obj1 = {} // object literal
+const obj2 = new Object(); // object constructor 
+```
+
+> computed properties
+```javascript
+console.log(tina['name']); // 어떤 속성이 필요한지 아직 모를 때 사용 
+console.log(tina.name);
+```
+
+> property value shorthand  
+constructor 사용하는 것 추천.
+
+> in operator
+```javascript
+console.log('name' in tina); //true 
+```
+
+> for ... in vs for ... of 
+```javascript
+for(key in tina) {
+    console.log(key);;
+}
+```
+
+```javascript
+const arr = [1,2,3,4,5];
+for(value of array) {
+    console.log(value);
+}
+```
+
+
+> fun cloning (deep copy)  
+
+: Object.assign(dest, [obj1,obj2,...]);
+동일한 property가 존재할 때 뒤쪽에 위치한 obj값을 앞쪽의 obj에 덮어씌움 
+```javascript
+const user2 =  {};
+Object.assign(user2,user);
+```
+
+## 배열 제대로 알고 쓰자. 자바스크립트 배열 개념과 APIs 총정리
+
+> 배열의 선언
+```javascript
+const arr1 = new Array();
+const arr2 = [1,2,3];
+```
+> 배열 looping
+```javascript
+arr2.forEach(element => {
+    console.log(element);
+});
+
+arr2.forEach((element,index) => {
+    console.log(element);
+});
+```
+
+> api : push , pop
+```javascript
+arr2.push('4') // [1,2,3,4]
+arr2.pop() // [1,2,3]
+arr2.unshift('0') //[0,1,2,3] -> 매우느림(데이터를 지우고 땡겨오는 과정이 필요함)
+arr2.shift() //[1,2,3] -> 매우느림
+```
+
+> splice
+```javascript
+arr2.splice(1) // [1]
+arr2.push(2);
+arr2.push(3); // [1,2,3]
+arr2.splice(1,1); // [1,3]
+```
+
+> concat 
+```javascript
+arr2.concat([4,5,6]); // [1,3,4,5,6]
+```
+
+> indexOf , includes, lastIndexOf
+- indexOf는 가장 처음에 등장하는 값 기준
+- lastIndexOf는 가장 나중에 등장하는 값 기준
+- includes는 포함 여부
+
+## 유용한 10가지 배열 함수들. Array APIs 총정리
+> array to string
+```javascript
+arr2.join('|') // 1|2|3 
+const str = arr2.join('') // "1,2,3" 
+```
+> string to array 
+```javascript
+str.split(','); //[1,2,3]
+str.split(''); //["1,2,3"]
+```
+
+> reversed array 
+```javascript
+arr3 = arr2.reverse() //[5,4,3,2,1];
+arr2 // [5,4,3,2,1]
+```
+
+> slice 
+새로운 배열을 return하며, 원본에는 영향을 미치지 않는다. 
+```javascript
+const result = arr2.slice(2,5); //[3,4,5]
+```
+
+> find
+```javascript
+const users = {
+    new User('tina',27),
+    new User('ringu',28)
+}
+...
+const result = users.find(function(user,index)) {
+    console.log(user.name, user.age, user.index);
+    return user.name === 'tina';
+});
+const result = users.find((user) => {
+    return user.name === 'tina';
+});
+```
+
+> filter 
+```javascript
+const result = user.filter((user)=> user.age >26); // [27,28]
+```
+
+> map 
+callback 함수로부터 얻어진 값으로 대체하는 것.
+```javascript
+const result =  user.map((user)=> user.age); //[27,28]
+```
+
+>some , every
+```javascript
+const result = user.some((user)=> user.age >27) // true
+const result = user.every((user)=> user.age >27) // false
+```
+
+> reduce 
+모든 요소를 누적시켜 모아놓는 함수이다. 
+```javascript
+const result = user.reduce((prev, curr) => {
+    console.log(prev,curr);
+    return prev + curr.age;
+},0); //45  
+
+const result = users.reduceRight((prev, curr) => { // 오른쪽에서부터 시작
+    console.log(prev,curr);
+    return prev + curr.age;
+},0); //45  
+```
+
+> sort 
+```javascript
+const result = users.map(user=>user.age).sort((a,b)=>a-b); // 오름차순 정렬
+const result2 = users.map(user=>user.age).sort((a,b)=>b-a); // 내림차순 정렬
+```
+
+## JSON 개념 정리 와 활용방법 및 유용한 사이트 공유 JavaScript JSON
+
+> json : javascript object notation 
+프로그래밍 언어, 플랫폼에 상관없이 언어의 특징에 맞게 변환 및 사용이 가능하다.  
+Symbol, 함수 등 js에만 있는 요소들은 배제된 채로 변환된다. 
+
+> Object to json
+```javascript
+const json = JSON.stringify(val);
+JSON.stringify(val),['name'];
+```
+
+> json to object
+```javascript
+JSON.parse(json); 
+```
+
+> http://www.jsondiff.com/
+> https://codebeautify.org/jsonviewer
+> https://jsonformatter.curiousconcept.com/
+참고하면 좋은 사이트들.
+
+## 비동기 처리의 시작 콜백 이해하기, 콜백 지옥 체험 😱 JavaScript Callback
+
+> sync vs async 
+
+> synchronous callback 
+```javascript
+printImmediately(() =>console.log('hello'));
+```
+> asynchronous callback
+```javascript
+printImmediately(() =>console.log('hello'),2000);
+```
+
+> callback 지옥
+
+순서가 중요한 실행 단계가 많은 경우 Callback Hell이 발생한다.  
+
+![callback](/static/images/callback.png)
+
+>💡 Callback Hell의 문제점
+> 1. 가독성이 좋지 않고
+> 2. 모듈화가 되지 않은 상태라
+> 3. 유지 보수가 어렵다.
+
+또, error에 대한 적절한 처리도 일일이 프로그래머가 해줘야 한다는 단점이 있다.
+
+## 프로미스 개념부터 활용까지 JavaScript Promise
+
+ES 6부터는 위 Callback Hell의 문제점을 해결할 수 있는 Promise 문법을 지원한다. 
+Promise 객체를 생성할 때 함수의 인자로 resolve, reject 콜백을 넣어주는 방식이다. 
+인자로 넘어가는 함수를 통틀어  Executor라고 한다.
+이때, 인자함수의 body를 Producing Code라고 한다. 구현로직이 들어가는 부분이다. 
+Producing Code의 결과를 기다리고 있다가 받아서 처리하는 부분은 Consuming Code라고 한다.
+
+새로운 Promise 객체가 생성되면, executor 부분이 바로 실행된다는 점에 유의한다. 
+이제, callback hell이 일어나지 않고, promise chaining의 형태로 실행된다. 
+
+```javascript
+new Promise(function(resolve, reject){ // executer, producing code 
+  setTimeout(function() {
+    if (response) {
+        resolve(response);
+    }
+    reject(new Error("Request is failed"));
+  }, 2000);
+})
+.then(function(result), { // consuming code
+  console.log(result); // 1
+  return result + 10;
+})
+.then(function(result) {
+  console.log(result); // 11
+  return result + 20;
+})
+.then(function(result) {
+  console.log(result); // 31
+})
+.catch(function(err) {
+  console.log('then error : ', err); // then error :  Error: Error in then()
+})
+.finally(function() {
+	console.log('반드시 실행됨');
+});
+```
+
+> Pending, Fulfilled, Rejected
+
+Executor는 `Pending` , `Fulfilled`, `Rejected` 세 가지의 상태를 통해 프로미스의 처리상황을 관리한다. 프로미스가 호출되고, resolve나 rejected 함수가 호출되기 전까지는 `Pending` 상태, resolve 함수가 호출되면 `Fulfilled`, reject 함수가 호출되면 `Rejected` 상태이다.
+## 비동기의 꽃 JavaScript async 와 await 그리고 유용한 Promise APIs
+async 와 await 은 Promise를 더 쉽게 사용할 수 있도록 도와주는 ES 6 문법이다. 즉, 가독성 있는 코드 처리를 할 수 있다.
+
+> async
+```javascript
+async function promiseFunction() {
+	return 1; // return Promise.resolve(1);
+}
+
+promiseFunction().then(result); // 1
+```
+함수 시그니처 앞에 async 키워드를 붙이면 해당 함수는 처리 상태를 가진 프로미스 객체를 반환한다. 다음 코드와 같이 Promise 객체를 반환하지 않아도 Fulfilled Promise로 wrapping해 반환해준다.
+
+> await 
+함수 호출부 앞에 await 키워드를 붙이면 호출된 프로미스가 완료 처리될 때까지 기다린다. 아래 코드는 promiseFunction() 의 처리가 완료될 때 까지 기다렸다가 결과를 받아낸다.
+```javascript
+let result = await promiseFunction();
+```
+
+> 일반적인 async && await 구조
+```javascript
+async function 함수명() {
+  const val1 = await 비동기_처리_메서드_명();
+  const val2 = await 비동기_처리_메서드_명2();
+}
+```
+
+> 유용한 Promise APIs
+
+병렬적으로 다같이 실행하기
+```javascript
+function testPromiseAll() {
+    return Promise.all([method(),method2()]).then(data => data.join());
+}
+```
+먼저 실행되는 것으로 사용하기
+```javascript
+function testPromiseRace() {
+    return Promise.race([method(),method2()]);
+}
+```

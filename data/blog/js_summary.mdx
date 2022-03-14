@@ -233,7 +233,8 @@ function randomQuiz(message , printYes, printNo) {
 }
 ```
 
-> arrow function (a.k.a 화살표 함수)
+> arrow function (a.k.a 화살표 함수)  
+
 화살표 함수는 항상 이름이 없는 ananymous function 이다. 
 ```javascript
 function sum(a,b) {
@@ -360,7 +361,8 @@ for(value of array) {
 
 > fun cloning (deep copy)  
 
-: Object.assign(dest, [obj1,obj2,...]);
+: Object.assign(dest, [obj1,obj2,...]);  
+
 동일한 property가 존재할 때 뒤쪽에 위치한 obj값을 앞쪽의 obj에 덮어씌움 
 ```javascript
 const user2 =  {};
@@ -457,6 +459,7 @@ const result = user.filter((user)=> user.age >26); // [27,28]
 ```
 
 > map 
+
 callback 함수로부터 얻어진 값으로 대체하는 것.
 ```javascript
 const result =  user.map((user)=> user.age); //[27,28]
@@ -469,7 +472,9 @@ const result = user.every((user)=> user.age >27) // false
 ```
 
 > reduce 
+
 모든 요소를 누적시켜 모아놓는 함수이다. 
+
 ```javascript
 const result = user.reduce((prev, curr) => {
     console.log(prev,curr);
@@ -508,6 +513,7 @@ JSON.parse(json);
 > http://www.jsondiff.com/
 > https://codebeautify.org/jsonviewer
 > https://jsonformatter.curiousconcept.com/
+
 참고하면 좋은 사이트들.
 
 ## 비동기 처리의 시작 콜백 이해하기, 콜백 지옥 체험 😱 JavaScript Callback
@@ -515,10 +521,12 @@ JSON.parse(json);
 > sync vs async 
 
 > synchronous callback 
+
 ```javascript
 printImmediately(() =>console.log('hello'));
 ```
 > asynchronous callback
+
 ```javascript
 printImmediately(() =>console.log('hello'),2000);
 ```

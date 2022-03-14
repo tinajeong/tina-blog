@@ -16,15 +16,12 @@ export async function getStaticProps() {
 export default function Home({ posts }) {
   return (
     <>
-      <PageSEO
-        title={siteMetadata.title}
-        description={siteMetadata.description}
-      />
+      <PageSEO title={siteMetadata.title} description={siteMetadata.description} />
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-            💫 Latest
+            🧑🏻‍💻 Latest
           </h1>
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
             {siteMetadata.description}
@@ -32,18 +29,13 @@ export default function Home({ posts }) {
         </div>
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
-          {!posts.length && (
-            <li className="text-lg pt-8">🧐 검색 결과가 없습니다.</li>
-          )}
+          {!posts.length && <li className="text-lg pt-8">🧐 검색 결과가 없습니다.</li>}
           {posts.slice(0, MAX_DISPLAY).map((frontMatter) => {
-            const { slug, thumbSrc, title, summary, tags } = frontMatter;
+            const { slug, thumbSrc, title, summary, tags } = frontMatter
             return (
               <li key={slug} className="py-14 items-center">
                 <article>
-                  <Link
-                    href={`/blog/${slug}`}
-                    className="text-gray-900 dark:text-gray-100"
-                  >
+                  <Link href={`/blog/${slug}`} className="text-gray-900 dark:text-gray-100">
                     <div className="space-y-2 xl:grid xl:grid-cols-4 xl:space-y-0">
                       <div className="rounded-md overflow-hidden">
                         <Image
@@ -61,9 +53,7 @@ export default function Home({ posts }) {
                       <div className="space-y-5 xl:col-span-3 xl:ml-5">
                         <div className="space-y-6">
                           <div>
-                            <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                              {title}
-                            </h2>
+                            <h2 className="text-2xl font-bold leading-8 tracking-tight">{title}</h2>
                             <div className="flex flex-wrap pt-3">
                               {tags.map((tag) => (
                                 <Tag key={tag} text={tag} />
@@ -88,7 +78,7 @@ export default function Home({ posts }) {
                   </Link>
                 </article>
               </li>
-            );
+            )
           })}
         </ul>
       </div>
@@ -104,5 +94,5 @@ export default function Home({ posts }) {
         </div>
       )}
     </>
-  );
+  )
 }

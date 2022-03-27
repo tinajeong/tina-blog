@@ -1,0 +1,57 @@
+---
+title: 'React 정리하기'
+thumbSrc: '/static/images/React.png'
+date: '2022-03-13'
+tags: ['react']
+draft: false
+summary: '코딩앙마 인강을 들으며 관련 내용을 정리합니다.'
+images: ['/static/images/React.png']
+---
+
+---
+
+## npx create-react-app voca
+: `create-react-app`을 통해 scratch부터 리액트 프로젝트를 세팅하지 않고 편리하게 초기 모듈과 프로젝트를 구성할 수 있다.
+
+## node_modules
+: gitignore에 추가할 파일
+
+## src
+: 대부분의 작업을 해당 폴더에서 진행
+
+## npm start  
+: `localhost:3000`에 리액트 프로젝트가 뛰워짐.     
+
+### hot module replacement (HMR)
+: 소스 수정을 저장할 때마다 실행중인 브라우저에 자동으로 반영되는 것 
+
+## component 
+: component 단위로 요소를 구분하고, 조합해서 사용하면 유지보수와 재사용성이 높아짐.
+
+## style
+: 동일한 className을 할당하면 렌더링 이후엔 동일한 html 파일에서 css를 import하기 때문에 [style이 override되는 것](https://github.com/tinajeong/react_voca_clone/commit/a54f02d8d256411a428b0f13bc0bb8f788d33054)을 확인할 수 있다.
+그러므로, `Jsname.module.css`의 형태로 파일 이름으로 변경하고, `import styles from 'css경로`의 형태로 적용을 원하는 스타일 시트를 임포트해주어야 한다. 이렇게 해야, 동일한 요소 이름을 가져도 [독립적으로 스타일을 관리](https://github.com/tinajeong/react_voca_clone/commit/8c68d8e776b59ed02692e56a927c34b6afd0e1eb) 할 수 있다. 
+
+## event 처리 
+: `<button onClick={showName}>Show name</button>`와 같이 미리 정의된 함수의 이름을 넘겨주거나 `<button onClick={() => {showAge(10);}}>`와 같이 화살표함수를 이용할 수도 있다.
+
+## useState
+: `import { useState } from "react"`로 react의 상태관리 기능을 이용할 수 있다. `const [isShow, setIsShow] = useState(false);`의 형태로 상태를 선언하고, 초기값을 넘겨줄 수 있다. `setIsShow`를 호출해 상태를 세팅하고, 관리할 수 있다. 
+
+## property
+: `<Hello age={10} />`의 형태로 값을 넘길 수 있고, `function Hello({ age }) `의 형태로 값을 받을 수 있다. 받은 값은 const이다.
+
+## npm install react-router-dom
+: `react-router-dom`를 통해 페이지 라우팅을 할 수 있다. 
+
+## npm install -g json-server
+:설치한 후 `json-server --watch ./src/db/data.json --port 3001`의 형태로 rest-api를 위한 서버를 띄워 사용할 수 있다. 
+
+## useEffect
+: 를 사용해, 변경 후 렌더링된 직후의 시점에 해당 함수를 이용할 수 있다. `useEffect`의 두번째 인자는 의존성 배열로, 빈 배열을 넣으면 한번만 실행하겠다는 뜻이 된다. 
+
+## custom hook
+: fetch와 함께 `useFetch.js`에 커스텀 훅을 사용해 해당 훅으로 통일성있게, 코드의 재사용성을 높어 사용할 수 있다. 
+
+## 발전을 위한 링크
+- 리액트에서 key가 왜 중요할까?

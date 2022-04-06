@@ -1,0 +1,391 @@
+---
+title: '생활코딩 React 2022 개정판 정리'
+thumbSrc: '/static/images/React_sangco.png'
+date: '2022-04-01'
+tags: ['React']
+draft: false
+summary: '생활코딩 React 2022 개정판을 수강하며 정리한 내용입니다.'
+images: ['/static/images/React_sangco.png']
+---
+
+## 📌 목차
+
+![React](/static/images/React_sangco.png)
+
+- **수업소개**
+- **실습환경구축**
+- **소스코드수정방법**
+- **컴포넌트만들기**
+- **props**
+- **이벤트**
+- **State**
+- **create**
+- **update**
+- **delete**  
+- [정리한 소스코드](https://github.com/tinajeong/react_saengco)
+---
+
+## 수업소개
+
+1. 리액트는 사용자정의태그를 만들고, 태그가 부품이 되어서 이용되는 형태에 특화된 프레임워크이다.
+2. class 형 문법과 function 형 문법이 있는데, 이번 강의에서는 함수형 문법으로 리액트를 다룬다.
+3. 어렵고 복잡한 테크닉은 그때 그때 배워서 사용한다.
+
+## 실습환경구축
+
+### 온라인
+
+[CodeSandbox](https://codesandbox.io/s/new), [Stackblitz](https://stackblitz.com/fork/react) 등을 통해 로컬 개발환경을 구축할 필요없이 여러가지를 시도해볼 수 있다.
+
+### 로컬
+
+#### Create React App (a.k.a cra)
+
+1. npx 명령어를 통해 cra를 사용하려면 nodejs를 다운로드 받아야 한다.
+2. nodejs 설치하고 난 다음에 생성하기 원하는 react 프로젝트를 생성한다.
+3. `npx create-react-app .` 또는 `npx create-react-app projectname` 를 타이핑한다.
+   - 첫번째 옵션은 현재폴더에 생성, 두번째 옵션은 프로젝트이름을 가진 폴더를 만들고 그 폴더 하위에 생성한다.
+
+#### dependency template 만들기
+
+해당 옵션은 이번 강좌에서 사용하지 않는다.
+
+## 소스코드 수정방법
+
+- `src/index.js` 파일은 시작이 되는 파일이다. 전역적인 세팅이 들어 있다.
+- index.js안에는 `<App/>` 태그가 있는데, 이는 ui의 전체를 의미하며, 해당 내용은 App.js 에 기재되어있다.
+- `public/index.html`에는 `index.js`에서 렌더링하는 id가 root인 컴포넌트가 들어있다.
+- 리액트 18부터는 `ReactDOM.render` 대신 `createRoot`를 사용해야 한다. 2022년 3월 30일 이후엔 cra 를 사용해 프로젝트를 생성하면 버전이 맞지 않아 업그레이드하라는 메세지가 뜬다.
+  아래는 `createRoot`를 사용해 프로젝트를 초기화 한 것이다.
+
+```javascript
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App'
+import reportWebVitals from './reportWebVitals'
+
+const container = document.getElementById('root')
+const root = createRoot(container)
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+)
+```
+
+## 컴포넌트 만들기
+
+- 리액트는 `사용자 정의 태그`를 만드는 기술이다.
+- `사용자 정의 태그`를 만들기 위해서는 소문자가 아닌 대문자로 선언해야 한다.
+- 리액트에서는 `사용자 정의 태그`를 컴포넌트라고 부른다.
+- 컴포넌트를 통해 재사용성을 높여서 화면을 설계할 수 있다.
+
+```javascript
+function Header(props) {
+  return (
+    <header>
+      <h1>
+        <a href="/">제목</a>
+      </h1>
+    </header>
+  );
+}
+...
+
+function App () {
+    return
+    ... <Header></Header>
+    <Header/>
+}
+```
+
+## props
+
+- html에 속성값이 들어갈 때가 있다.
+- 컴포넌트 함수에 첫번째 인자로 `props`를 넘기면 속성값을 참조할 수 있다.
+  - 인자의 이름은 상관없다.
+- 속성값을 참조할 때는 `{}`, 중괄호를 사용한다. 리액트를 이를 표현식이라고 인식한다.
+  - 표현식의 자리에 배열이 올 수도 있다. 리액트가 알아서 배열을 렌더링해준다.
+- 배열 렌더링 시에는 key 속성에 유니크한 값을 주어야 한다.
+
+```javascript
+function Header(props) {
+  return (
+    <header>
+      <h1>
+        <a href="/">{props.title}</a>
+      </h1>
+    </header>
+  );
+}
+function Navigator(props) {
+  const list = [];
+  props.topics.map((topic) => {
+    list.push(
+       <li key={topic.id}>
+        <a href={"/read/" + topic.id}>{topic.title}</a>
+      </li>
+    );
+  });
+  return (
+    <nav>
+      <ol>{list}</ol>
+    </nav>
+  );
+}
+...
+function App () {
+    const topics = [
+        { id: 1, title: "html", body: "html is..." },
+        { id: 2, title: "css", body: "css is..." },
+        { id: 3, title: "javascript", body: "javascript is..." },
+    ];
+    return
+    ... <Header title="타이틀"></Header>
+    <Navigator topics={topics}></Navigator>
+}
+```
+
+## 이벤트
+
+- 리액트 코드에 들어가는 이벤트 속성이름은 html과 다르다는 점에 유의한다. ex) `onClick`
+- `onChangeMode`는 함수 인자로 id값이 필요하다. 가장 쉬운 방법은 요소의 태그 id에 아이디를 부여하는 방법이다.
+
+```javascript
+
+function Navigator(props) {
+  const list = [];
+  props.topics.map((topic) => {
+    list.push(
+      <li key={topic.id}>
+        <a id={topic.id} href={"/read/" + topic.id} onClick={ event =>{
+          event.preventDefault();
+          props.onChangeMode(event.target.id);
+        }}>{topic.title}</a>
+      </li>
+    );
+  });
+  return (
+    <nav>
+      <ol>{list}</ol>
+    </nav>
+  );
+}
+...
+function App() {
+    ...
+   return (
+    <div className="App">
+      ...
+      <Navigator topics={topics} onChangeMode={(id)=>{
+        alert(id);
+      }}></Navigator>
+      ...
+    </div>
+  );
+}
+```
+
+## State
+
+- input인 prop이 들어오면, 컴포넌트함수에서 ui만들어 return해준다.
+- `prop`은 외부 코드를 위한 데이터, `state`는 내부 코드를 위한 데이터이다.
+- 상태값은 리액트가 제공하는 기본훅인 useState을 통해 관리한다.
+  - `import {useState} from 'react';`
+- useState 선언 시 기입하는 인자는 상태의 초기값이다.
+- useState의 첫번째 요소는 상태값 그 자체이며, 두번째요소는 상태값을 설정하는 함수이다.
+  - 구조분해할당 문법을 통해 간략하게 기술하는 것이 일반적이다. ex) `const [mode, setMode] = useState('WELCOME');`
+- `onChangeMode`의 인자로 숫자타입이 들어가야 한다.
+
+```javascript
+function Navigator(props) {
+  const list = [];
+  props.topics.map((topic) => {
+    list.push(
+      <li key={topic.id}>
+        <a id={topic.id} href={"/read/" + topic.id} onClick={event =>{
+          event.preventDefault();
+          props.onChangeMode(parseInt(event.target.id));
+        }}>{topic.title}</a>
+      </li>
+    );
+  });
+  return (
+    <nav>
+      <ol>{list}</ol>
+    </nav>
+  );
+}
+...
+function App() {
+  // const _mode = useState('WELCOME'); // 초기값
+  // const mode = _mode[0];
+  // const setMode = _mode[1];
+
+  const [mode, setMode] = useState('WELCOME');
+  const [id,setId] = useState(null);
+  ...
+  let content = null;
+  if(mode ==='WELCOME') {
+    content = <Article title="Welcome" body="Hello, WEB"></Article>;
+  }
+  else if(mode ==='READ') {
+    let title, body = null;
+    topics.map((topic)=>{
+      if(topic.id === id) {
+        title = topic.title;
+        body = topic.body;
+      }
+    })
+    content = <Article title={title} body={body}></Article>;
+  }
+  return (
+    <div className="App">
+      <Header title="REACT" onChangeMode={()=>{
+        setMode('WELCOME');
+      }}></Header>
+      <Navigator topics={topics} onChangeMode={(_id)=>{
+        setMode('READ');
+        setId(_id);
+      }}></Navigator>
+      {content}
+    </div>
+  );
+}
+```
+
+## create
+
+- useState의 상태 타입은 primitive타입과 object 타입으로 구분된다.
+- 가장 유명하고 많이 쓰이는 상태 타입은 string, number, boolean 이다.
+- 상태의 타입이 object라면, 데이터를 복제해주어야 한다. ex) `newValue = {...value}`, `newValue = [...value]`
+- object 타입에는 object와 array가 포함된다.
+- 원본에서 값이 변경된 복제본을 상태설정함수의 인자로 넣어주면, 리액트는 이전 데이터와 동일한지 비교하고, 다르다면 그때 다시 컴포넌트를 렌더링한다.
+  - state를 set한다고 바로 eager하게 렌더링하지않고, lazy하게 처리한다.
+
+```javascript
+function Create(props) {
+  return <article>
+    <form onSubmit={event=>{
+      event.preventDefault();
+      const title = event.target.title.value;
+      const body  = event.target.body.value; 
+      props.onCreate(title,body);
+    }}>
+      <p><input type="text" name="title" placeholder="title"/></p>
+      <p><textarea name="body" placeholder="body" ></textarea></p>
+      <p><input type="submit" value="Create"></input></p>
+    </form>
+  </article>
+}
+...
+function App() {
+    const [mode, setMode] = useState('WELCOME');
+    const [id,setId] = useState(null);
+    const [nextId, setNextId] = useState(4);
+    const [topics, setTopics] = useState([
+        { id: 1, title: "html", body: "html is..." },
+        { id: 2, title: "css", body: "css is..." },
+        { id: 3, title: "javascript", body: "javascript is..." },
+    ]);
+    ...
+      else if(mode ==='CREATE') {
+    content = <Create onCreate={(_title,_body)=>{
+      const newTopic = {id:nextId, title:_title,body:_body}
+
+      const newTopics = [...topics];
+      newTopics.push(newTopic);
+      setTopics(newTopics);
+      setMode('READ');
+      setId(nextId);
+      setNextId(nextId+1);
+    }}></Create>;
+    ...
+     return (
+    <div className="App">
+     ...
+      <a href="/create" onClick={(e)=>{
+        e.preventDefault();
+        setMode('CREATE');
+      }}>create</a>
+    </div>
+  );
+  }
+}
+```
+## update 
+- props의 title과 body를 텍스트 영역에 세팅해주면 input 텍스트가 수정되지 않는다. 이는 `props` 는 외부 코드를 위한 데이터이기 때문이다. `state`를 사용해 내부의 상태를 변화시키는 방식으로 사용해야 한다.
+    - 아래 코드에서는 title, body 를 state로 바꿔주었다. 
+```javascript
+function Update(props){
+  const [title, setTitle] = useState(props.title);
+  const [body, setBody] = useState(props.body);
+  return <article>
+    <h2>Update</h2>
+    <form onSubmit={event=>{
+      event.preventDefault();
+      const title = event.target.title.value;
+      const body = event.target.body.value;
+      props.onUpdate(title, body);
+    }}>
+      <p><input type="text" name="title" placeholder="title" value={title} onChange={event=>{
+        setTitle(event.target.value);
+      }}/></p>
+      <p><textarea name="body" placeholder="body" value={body} onChange={event=>{
+        setBody(event.target.value);
+      }}></textarea></p>
+      <p><input type="submit" value="Update"></input></p>
+    </form>
+  </article>
+}
+...
+  else if(mode ==='UPDATE') {
+    let title, body = null;
+    const pickedIndex = topics.findIndex(topic => {
+      return topic.id === id;
+    }) 
+    title = topics[pickedIndex].title;
+    body = topics[pickedIndex].body;
+
+    content = <Update title={title} body={body} onUpdate={
+      (title,body) => {
+        const newTopics = [...topics];
+        newTopics[pickedIndex] = {id:id, title:title, body:body};
+        setTopics(newTopics);
+        setMode('READ');
+      }
+    }></Update>  
+  }
+```
+## delete
+- react 컴포넌트 안에 여러개 태그가 들어가야 할때는 `<></>` 처럼 빈태그로 묶어준다. 
+```javascript
+    contextControl = <>
+    <li><a href={'/update/'+id} onClick={e=>{
+      e.preventDefault();
+      setMode('UPDATE');
+    }}>update</a></li>
+    <li><input type="button" value="Delete" onClick={()=>{
+      const newTopics = []
+      for(let i=0; i<topics.length; i++){
+        if(topics[i].id !== id){
+          newTopics.push(topics[i]);
+        }
+      }
+      setTopics(newTopics);
+      setMode('WELCOME');
+    }} /></li>
+  </>
+```
+## 궁금증
+
+- 실무 리액트 프로젝트에서 css는 어떻게 관리할까? 리액트 프로젝트의 퍼블리싱담당자는 어떤식으로 퍼블을 줄까? 일관성과 다양성을 둘다 잡기 위한 설계가 필요할 것으로 보인다.
+- 컴포넌트가 참조하는 prop이 있을때, 해당값이 존재하지 않는 등 참조될 값이 존재하지 않으면 아무런 경고나 에러도 없이 해당 컴포넌트를 출력하지 않는다. 왜 그런 것일까?
+- `import React from "react";`는 react 17이상의 cra로 세팅하면 컴포넌트 자바스크립트 파일에서는 auto-import가 된다고 했는데, react 18의 `createRoot` 옵션을 적용하면서 다시 auto-import가 되지 않았다.
+- `State` 파트에서 `props.onChangeMode(parseInt(event.target.id));`처럼 왜 숫자타입으로 변환시켜 들어가야 하는지 모르겠다.
+
+## 참고
+
+- https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html#updates-to-client-rendering-apis
+- https://bobbyhadz.com/blog/react-createroot-target-container-not-dom-element

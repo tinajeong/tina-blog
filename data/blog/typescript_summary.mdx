@@ -1,0 +1,201 @@
+---
+title: 'Typescript 정리'
+thumbSrc: '/static/images/Typescript.webp'
+date: '2022-04-09'
+tags: ['Typescript']
+draft: false
+summary: '한 눈에 보는 타입스크립트 강좌를 읽으며 요약하였습니다.'
+images: ['/static/images/Typescript.webp']
+---
+## 📌 목차
+
+![Typescript](/static/images/Typescript.webp)
+
+- Intro
+- Type Basic
+
+---
+
+## Intro
+### 타입스트립트 사용법
+- 자바스크립트 파일의 확장자가 `.js`인것처럼, 타입스트립트 파일의 확장자는 `.ts`이다.
+- `tsc` 명령어를 통해 타입스크립트 컴파일러를 별도로 사용해 `.js` 파일로 변환한다. 
+    - `npm install -g typescript` : 글로벌로 타입스크립트 설치
+- 코드검사, 수정 등을 도와주는 에디터를 사용하는 것이 편리하다. `ex) vscode, webstorm`
+
+### 타입스크립트의 기능
+- 자바스크립트의 수퍼셋으로의 기능을 가지고 있다. 
+- 객체지향과 정적타입 문법을 지원한다. 
+
+### 타입스크립트 프로젝트세팅
+- 타입스크립트 컴파일 옵션을 `tsconfig.json` 파일을 통해 관리할 수 있다. 
+- 해당 파일을 프로젝트 루트 경로에 생성하여 프로젝트별로 컴파일 옵션을 관리할 수 있다.
+- https://www.typescriptlang.org/play 에서 타입스크립트 코드가 자바스크립트언어로 어떻게 변환되는지 확인할 수 있다. 
+- https://replit.com/new/typescript 에서 간단한 타입스크립트 프로젝트를 생성할 수 있다. 
+
+#### 로컬에서 프로젝트세팅하기
+- 로컬에서는 프로젝트 폴더 하위에 `npm install -D typescript parcel-bundler`를 추가하고, `tsconfig.json`를 만들어 사용하면 편리하다. 
+- `tsconfig.json`예시
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES6",
+    "lib": ["ES2015", "DOM"],
+    "module": "CommonJS"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+```
+- 로컬 프로젝트 예시 구조
+```bash
+├── index.html
+├── package-lock.json
+├── package.json
+├── src
+│   └── main.ts
+└── tsconfig.json
+```
+
+- `main.ts`에 타입 스크립트 코드를 작성하고, `index.html` 에서 타입스크립트를 참조시킨다.
+- `npx parcel index.html`을 통해 빌드하면 로컬에서 돌아간다. 
+
+## Type Basic
+### 타입지정 기본
+변수 오른쪽에 `: type_name`과 같은 형태로 타입을 명시한다. 
+```typescript
+const num : number = 1;
+const num : number = "1" // ERROR!! Type 'string' is not assignable to type 'number'.
+const str : string = "string"
+```
+
+배열은 다음과 같이 타입을 선언할 수 있다. 
+
+> case 1: 하나의 원시타입을 원소로 가지는 배열
+```typescript
+const strArr : string[] = ['a','b','c'];
+const strArr2 : Array<string> = ['a','b','c'];
+```  
+
+> case 2: 두개의 원시타입을 원소로 가질 수 있는 배열  
+
+- `|` 연산자로 타입을 연결시킨 것을 union type이라고 하며, or 조건과 같이 두개의 타입을 모두 허용한다. 
+
+```typescript
+const arr : (string : number)[] = ['a','b','c',1,2,3];
+```
+
+> case 3: 모든 타입을 허용하는 배열  
+
+- 배열의 타입을 단언할 수 없을 때 사용한다. 
+```typescript
+const anyArr : any[] = ['a',true,1];
+```
+
+> case 4 : interface나 user-define type을 원소로 가지는 배열
+```typescript
+interface User {
+    id : string, 
+    name : string,
+    isAdmin : boolean
+}
+const userArr : User[] = [
+    {
+        id: 'fjdkfj',
+        name : "Tina",
+        isAdmin : true
+    }
+]
+```
+### 튜플 타입지정 
+- 튜플은 고정된 길이의 배열을 표현한다.
+- 고정된 길이의 배열이기 때문에 특정인덱스에 위치하는 타입을 명시할 수 있다. 
+- 재할당할수 없다.(assign x)
+- push, spllice는 가능하다. 
+```typescript
+let users [string, string ,boolean][];
+user = [['1','Tina',true],['2','Lion',false]];
+```
+### enum 타입지정
+- 매핑값은 0부터 시작된다.
+- 문자열 매핑해서 사용할 수 있지만, 개별로 매핑해야 한다.
+```typescript
+enum Week {
+    Mon,
+    Tue,
+    Wed,
+    Thu,
+    Fri,
+    Sat,
+    Sun
+}
+enum Size {
+    S = 'small',
+    M = 'medium',
+    L = 'large'
+}
+```
+### any, unknown 타입지정
+- any로 타입을 지정하면 바닐라 js에서 변수를 할당하는 것과 동일하게 사용할 수 있다.
+- unknown으로 타입을 지정하면 나머지는 any와 동일하지만 해당 변수를 다른 타입인 변수에 대입할수 없다. `as type_name`으로 타입을 특정하면 가능.
+- unknown보단 보다 명확한 타입을 사용하는 것이 좋다.
+```typescript
+const anyNum : any = 1
+let num = anyNum;
+const unknownNum : unknown = 1
+num = unknownNum // error
+num = unknownNum as number
+```
+
+### object 타입 지정 
+- object는 최상위 객체를 포함한 모든 객체를 의미하기 때문에 요소의 타입을 지정하거나 interface를 사용한다. 
+```typescript
+let obj : object = null;
+// type
+let user1 : {id:string, name:string, isAdmin:boolean} = {
+        id: 'fjdkfj',
+        name : "Tina",
+        isAdmin : true
+}
+//interface
+interface User {
+    id : string, 
+    name : string,
+    isAdmin : boolean
+}
+```
+### 함수 
+- void 로 반환값이 없는 함수로 명시할 수 있다.
+- never는 항상오류는 출력하거나 어떤값도 반환하지 않을때 사용한다. 
+- 화살표 함수를 통해 타입을 지정할 수 있다. 
+```typescript
+let myFunc : () => void; 
+```
+### union, intersection 
+- `|` 연산자로 타입을 연결시킨 것을 union type이라고 하며, or 조건과 같이 두개의 타입을 모두 허용한다. 
+- '&' 연산자로 타입을 두개다 포함시킬 수 있다. 새로운 타입을 생성하지 않고 기존의 타입을 조합해 사용하는 방법이다. 
+
+### 타입추론 
+- typescript에서 모든 상황에 타입을 명시해야 하는 것은 아니다. 
+- 타입을 추론해주는 경우에는 프로그래머가 타입을 명시할 필요가 없다.
+    - 초기화된 변수 
+    - 기본값이 설정된 함수의 매개변수 
+    - 반환값이 있는 함수
+### 타입단언
+- 말그대로 프로그래머가 타입에 대해 확신을 가지고 단언하는 것이다. 
+- 함수의 로직은 숫자만 받아들이지만, 문자열도 숫자로 변환해 사용하고 싶은 경우에 사용한다. 
+- 프로그래머가 타입스트립트에게 타입에 대한 힌트를 주는 것이다. 
+- 타입단언을 통해 컴파일 타임에서 타입에 대한 처리를 마무리할 수 있다. 
+- `<Type>`이나 `as Type`을 통해 타입을 단언할 수 있으며, 전자는 jsx문법과 충돌이 발생하기도 한다.   
+
+### 타입가드 
+- 타입단언을 여러번 사용해야 하는 경우 `is type`을 통해 일정한 범위의 타입을 단언할 수 있다. 
+- `typeof`, `in`, `instanceof` 연산자도 사용한다. 
+- 
+## 참고
+- https://edu.goorm.io/lecture/22106/한-눈에-보는-타입스크립트 

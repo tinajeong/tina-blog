@@ -13,7 +13,10 @@ images: ['/static/images/typescript.webp']
 
 - Intro
 - Type Basic
-
+- Interface
+- Type Alias
+- Generic
+- Function
 ---
 
 ## Intro
@@ -178,11 +181,11 @@ let myFunc : () => void;
 ```
 ### union, intersection 
 - `|` 연산자로 타입을 연결시킨 것을 union type이라고 하며, or 조건과 같이 두개의 타입을 모두 허용한다. 
-- '&' 연산자로 타입을 두개다 포함시킬 수 있다. 새로운 타입을 생성하지 않고 기존의 타입을 조합해 사용하는 방법이다. 
+- `&` 연산자로 타입을 두개다 포함시킬 수 있다. 새로운 타입을 생성하지 않고 기존의 타입을 조합해 사용하는 방법이다. 
 
 ### 타입추론 
 - typescript에서 모든 상황에 타입을 명시해야 하는 것은 아니다. 
-- 타입을 추론해주는 경우에는 프로그래머가 타입을 명시할 필요가 없다.
+- 타입이 명확해, 타입을 추론해주는 경우에는 프로그래머가 타입을 명시할 필요가 없다.
     - 초기화된 변수 
     - 기본값이 설정된 함수의 매개변수 
     - 반환값이 있는 함수
@@ -194,8 +197,227 @@ let myFunc : () => void;
 - `<Type>`이나 `as Type`을 통해 타입을 단언할 수 있으며, 전자는 jsx문법과 충돌이 발생하기도 한다.   
 
 ### 타입가드 
-- 타입단언을 여러번 사용해야 하는 경우 `is type`을 통해 일정한 범위의 타입을 단언할 수 있다. 
-- `typeof`, `in`, `instanceof` 연산자도 사용한다. 
-- 
+- 타입단언을 여러번 사용해야 하는 경우등 일정한 범위의 타입을 단언할때 타입가드를 통해 처리한다
+- `is`,`typeof`, `in`, `instanceof` 등의 연산자를 사용해 타입가드를 처리할 수 있다. 
+
+## Interface
+- interface 키워드를 통해 클래스의 스펙을 정의하거나, 객체로서 활용할 수 있다.
+- 멤버변수를 구분할때, `,`,`;` 로 구분하거나 개행으로만 구분할 수 있다.
+- 변수명 뒤에 `?`를 붙여 옵셔널한 변수를 선언할수도 있다. 
+- 변수명 앞에 `readonly`를 붙여 할당뒤에 값 수정을 방지할 수 있다.
+- 모든 멤버가 `readonly`라면 유틸리티나 타입단언을 사용해 문법적으로 간결하게 작성할 수 있다.
+```typescript
+interface IUser {
+  name: string,
+  age: number
+}
+// Or
+interface IUser {
+  name: string;
+  age: number;
+}
+// Or
+interface IUser {
+  name: string
+  age: number
+}
+interface IUser {
+  name: string
+  readonly age: number
+  isAdmin? : boolean
+}
+
+// Readonly Utility
+interface IUser {
+  name: string,
+  age: number
+}
+let user: Readonly<IUser> = {
+  name: 'Neo',
+  age: 36
+};
+user.age = 85; // Error
+user.name = 'Evan'; // Error
+
+// Type assertion
+let user = {
+  name: 'Neo',
+  age: 36
+} as const;
+user.age = 85; // Error
+user.name = 'Evan'; // Error
+```
+### 함수 in interface
+- 함수의 시그니처를 인터페이스에 선언할 수 있다. 
+```typescript
+interface IName {
+  (PARAMETER: PARAM_TYPE): RETURN_TYPE // Call signature
+}
+```
+```typescript
+interface IUser {
+  name: string
+}
+interface IGetUser {
+  (name: string): IUser
+}
+
+const getUser: IGetUser = function (n) { // n is name: string
+  // Find user logic..
+  // ...
+  return user;
+};
+getUser('Heropy');
+```
+### 클래스 of interface
+- interface의 정해진 시그니처 형태로 구현하기 위해 interface를 상속받을수 있다.
+```typescript
+interface IUser {
+  name: string,
+  getName(): string
+}
+
+class User implements IUser {
+  constructor(public name: string) {}
+  getName() {
+    return this.name;
+  }
+}
+
+const neo = new User('Neo');
+neo.getName(); // Neo
+```
+- interface는 `extends` 키워드를 통해 interface 간의 상속이 가능하다.
+```typescript
+interface IAnimal {
+  name: string
+}
+interface ICat extends IAnimal {
+  meow(): string
+}
+
+class Cat implements ICat { // Error - TS2420: Class 'Cat' incorrectly implements interface 'ICat'. Property 'name' is missing in type 'Cat' but required in type 'ICat'.
+  meow() {
+    return 'MEOW~'
+  }
+}
+```
+#### 구성 시그니처
+- interface 형태의 객체를 호출하려면 `new` 키워드를 사용해 구성 시그니처를 선언해야 한다. 
+```typescript
+
+// 구성 시그니처
+interface ICat {
+  name: string
+}
+interface ICatConstructor {
+  new (name: string): ICat;
+}
+
+class Cat implements ICat {
+  constructor(public name: string) {}
+}
+
+function makeKitten(c: ICatConstructor, n: string) {
+  return new c(n); // ok
+}
+const kitten = makeKitten(Cat, 'Lucy');
+console.log(kitten);
+```
+
+### indexable type 
+- 숫자나 문자열 형태로 접근이 가능한 타입을 indexable type이라고 한다. 
+-  interface에서도 해당 feature를 이용할 수 있다.
+```typescript
+interface IUser {
+  [userProp: string]: string | boolean
+}
+let user: IUser = {
+  name: 'Neo',
+  email: 'tinajeong@gmail.com',
+  isValid: true,
+  0: false
+};
+console.log(user['name']); // 'Neo' is string.
+console.log(user['email']); // 'tinajeong@gmail.com' is string.
+console.log(user['isValid']); // true is boolean.
+console.log(user[0]); // false is boolean
+console.log(user[1]); // undefined
+console.log(user['0']); // false is boolean
+```
+## Type Alias
+- `type` 키워드를 사용해 타입의 별칭을 만들수 있다. 일종의 user-defined 타입이다.
+```typescript
+type MyType = string;
+type YourType = string | number | boolean;
+type TUser = {
+  name: string,
+  age: number,
+  isValid: boolean
+} | [string, number, boolean];
+
+let userA: TUser = {
+  name: 'Neo',
+  age: 85,
+  isValid: true
+};
+let userB: TUser = ['Evan', 36, false];
+
+function someFunc(arg: MyType): YourType {
+  switch (arg) {
+    case 's':
+      return arg.toString(); // string
+    case 'n':
+      return parseInt(arg); // number
+    default:
+      return true; // boolean
+  }
+}
+```
+## Generic
+- 타입을 선언 시점이 아닌, 사용하는 시점에 타입을 명시할 수 있는 문법이다. 
+```typescript
+function toArray<T>(a: T, b: T): T[] {
+  return [a, b];
+}
+
+toArray<number>(1, 2);
+toArray(1, 2); // 타입추론
+toArray<string>('1', '2');
+toArray<string | number>(1, '2');
+toArray<number>(1, '2'); // Error
+```
+- 제약조건을 넣어 일부타입으로 제너릭 사용을 제한 시킬수도 있다.
+- 3개 이상의 타입을 명시하려면 `type` 키워드를 사용한다. 
+- 제약조건은 `extends`와 함께만 사용될 수 있다.
+```typescript
+interface MyType<T extends string | number> {
+  name: string,
+  value: T
+}
+type U = string | number | boolean 
+
+interface IUser<T extends U> {
+  name: string,
+  age: T
+}
+```
+## Function
+
+### this, bind
+- callback 함수등 호출하지 않은 함수가 있을 경우에는 bind를 이용해 매핑해준다. 
+```typescript
+obj.b(); // Hello~
+
+const b = obj.b.bind(obj);
+b(); // Hello~
+
+function someFn(cb: any) {
+  cb();
+}
+someFn(obj.b.bind(obj)); // Hello~
+
+setTimeout(obj.b.bind(obj), 100); // Hello~
+```
 ## 참고
 - https://edu.goorm.io/lecture/22106/한-눈에-보는-타입스크립트 

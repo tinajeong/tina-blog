@@ -1,0 +1,122 @@
+---
+title: 'tsconfig.json'
+thumbSrc: '/static/images/typescript.webp'
+date: '2022-04-10'
+tags: ['Typescript']
+draft: false
+summary: 'tsconfig파일에 대해 정리하였습니다.'
+images: ['/static/images/typescript.webp']
+---
+![Typescript](/static/images/typescript.webp)
+
+---
+
+## `tsconfig.json` 이란?
+타입스크립트 컴파일러가 실행될 때 필요한 옵션을 지정하는 파일이다. 이 파일은 TypeScript 프로젝트의 루트경로에 위치한다. `tsc`명령어의 `-p` 옵션을 사용해 파일의 위치를 지정할 수도 있다.
+
+```bash
+.
+├── index.html
+├── package-lock.json
+├── package.json
+├── src
+│   ├── main.ts
+│   └── system.ts
+└── tsconfig.json
+```
+
+## 속성 : `files`
+타입스크립트 컴파일러가 탐색할 타입스크립트 파일을 탐색한다. files 속성에는 상대경로나, 절대경로로 파일을 남긴다. 
+```json
+{
+    "files" : [
+        "main.ts",
+        "system.ts"
+    ]
+}
+```
+
+## 속성 : `include`, `exclude`
+`include`는 탐색할 파일 패턴을, `exclude`는 제외할 파일 패턴을 명시한다. 
+- `**/` 재귀적으로 모든 하위 디렉토리와 매칭한다.
+- `*` 는 타입스크립트가 지원하는 확장자 목록이 포함된다. 
+    - `ts`,`tsx`, `.d.ts`
+    - `allowJs` 속성값이 `true`라면 `js`,`jsx` 도 포함
+- `files`, `include`,`exclude` 속성 모두 아무것도 명시되어 있지 않을경우 기본적으로 타입스크립트가 지원하는 파일만 포함시킨다. 
+- `files`, `include` 가 둘다 명시되어 있으면 두 속성의 합집합으로 처리한다. 
+- `files`, `include`에 명시되지 않았더라도, `files`, `include`에 명시된 파일이 해당 파일을 참조한다면 자동으로 포함된다.
+    - 제외시키려면 `exclude`에 포함시켜야 한다. 
+
+```json
+{
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ]
+}
+```
+
+## 속성 : `target`
+컴파일된 코드가 어떤 환경에서 실행될지 지정한다. 예를 들어 `es5`로 명시했다면 `es6`식의 코드가 `es5`식으로 변환된다. 
+
+```json
+"compilerOptions": {
+    "target": "es5"
+  }
+```
+
+## 속성: `module`
+모듈 시스템을 지정한다. 
+- `commonjs`의 경우 `export default Sample`을 `exports.default = helloWorld`로 변환해준다. 
+- `es2015`의 경우 `export default Sample`을 따로 변환하지 않는다. 
+- `esModuleInterop` 가 `true`라면, `commonjs` 형태의 모듈을 `es2015` 형태로 불러올 수 있게 지원한다. 
+    - `require`형태(`commonjs`)로 불러오던 모듈을 `import` 형태(`es6`)로 변환한다.
+```json
+"compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "esModuleInterop": true
+  }
+```
+## 속성 : `strict`
+- 모든 타입 체킹을 활성화하는 것으로, 데이터타입을 좀더 강하게 검증하겠다는 옵션이다.
+- `strict` 옵션을 활성화하면 타입에 대한 명시를 보다 명확하게 처리할 수 있다.
+    - 다음 서브 옵션들이 모두 활성화된다.
+```json
+  "noImplicitAny": true,
+  "noImplicitThis": true,
+  "alwaysStrict": true,
+  "strictBindCallApply": true,
+  "strictNullChecks": true,
+  "strictFunctionTypes": true,
+  "strictPropertyInitialization": true
+```
+```json
+"compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "strict": true
+  }
+```
+
+## 속성 : `outDIr`
+컴파일된 파일이 저장되는 경로를 지정한다.
+```json
+"compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "./dist"
+  }
+```
+
+## 참고
+- https://typescript-kr.github.io/pages/tsconfig.json.html
+- https://react.vlpt.us/using-typescript/01-practice.html
+- https://stackoverflow.com/questions/56238356/understanding-esmoduleinterop-in-tsconfig-file
+- https://dev.to/jsdev/strict-mode-typescript-j8p

@@ -1,0 +1,143 @@
+---
+title: 'Redux'
+thumbSrc: '/static/images/Redux.png'
+date: '2022-04-17'
+tags: ['Redux']
+draft: false
+summary: 'Redux에 대해 정리하였습니다.'
+images: ['/static/images/Redux.png']
+---
+![Redux](/static/images/Redux.png)
+
+---
+
+# 왜 리덕스가 필요한가?
+만약 아래와 같이 number의 값을 Left3으로 전달하고 싶다면 props를 통해 여러 단계를 거쳐 전달할 수 밖에 없다.     
+```javascript
+export default function App() {
+  const [number, setNumber] = useState(1);
+  return (
+    <div className="App" id="container">
+      <h1>root</h1>
+      <Left1 number={number}></Left1>
+    </div>
+  );
+}
+
+function Left1(props) {
+  return (
+    <div>
+      <h1>Left1</h1>
+      <Left2 number={props.number}></Left2>
+    </div>
+  );
+}
+
+function Left2(props) {
+  return (
+    <div>
+      <h1>Left2</h1>
+      <Left3 number={props.number}></Left3>
+    </div>
+  );
+}
+
+function Left3(props) {
+  return (
+    <div>
+      <h1>{props.number}</h1>
+    </div>
+  );
+}
+
+```
+
+# 리액트 리덕스의 4인방 
+
+```javascript
+import { Provider, useSelector, useDispatch, connect } from 'react-redux'
+```
+
+- Provider
+- useSelector 
+- useDispatch
+- connect  
+
+```javascript
+
+function reducer(currentState, action) {
+  if (currentState === undefined) {
+    return {
+      number: 1,
+    }
+  }
+  const newState = { ...currentState }
+  return newState
+}
+
+const store = createStore(reducer);
+
+export default function App() {
+  return (
+    <div id="container">
+      <h1>Root</h1>
+      <div id="grid">
+        <Provider store={store}>
+          <Left1></Left1>
+          <Right1></Right1>
+        </Provider>
+      </div>
+    </div>
+  )
+}
+
+```
+이중 Provider를 가장 먼저 알아야하는데, Provider로 컴포넌트를 감싸면 그때부터 전역적인 상태를 이용할 수 있게 된다. 
+```javascript
+function Left3(props) {
+  function f(state) {
+    return state.number
+  }
+  const number = useSelector(f)
+  return (
+    <div>
+      <h1>Left3 : </h1>
+    </div>
+  )
+}
+
+```
+그리고, 불러온 값을 useSelector를 통해 가져올 수 있다.
+```javascript
+function reducer(currentState, action) {
+  if (currentState === undefined) {
+    return {
+      number: 1,
+    }
+  }
+  const newState = { ...currentState }
+  if (action.type === 'PLUS') {
+    newState.number++
+  }
+  return newState
+}
+...
+function Right3(props) {
+  const dispatch = useDispatch()
+  return (
+    <div>
+      <h1>Right3</h1>
+      <input
+        type="button"
+        value="+"
+        onClick={() => {
+          dispatch({ type: 'PLUS' })
+        }}
+      ></input>
+    </div>
+  )
+}
+```
+가져온 값은 dispatch를 호출해 스토어의 reducer를 호출하는 식으로 변화시킨다. 
+
+

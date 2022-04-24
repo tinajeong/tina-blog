@@ -2,7 +2,7 @@
 name: 티나
 avatar: /static/images/profile.png
 occupation: Jr. Backend Developer
-company: .
+company: Keep exploring, 계속 탐색하세요.
 email: migujeong@gmail.com
 linkedin: https://www.linkedin.com/in/chanmi-jeong-535630194/
 github: https://github.com/tinajeong

@@ -65,7 +65,7 @@ addNums("a",1);
 이는 런타임에 에러를 생성한다는 측면에서 사용자경험을 악화시킬 위험성을 가진다. 
 자바스크립트는 런타임에 타입을 검사하는 dynamic type언어이기 때문이다. 
 
-반면 typescript는 컴파일타임에 타입을 검사하는 static type 전략을 가지고 있기 때문에 컴파일 타임의 검사가 또다시 타입스크립트의 장점으로 강조된다. 
+반면 typescript는 컴파일타임에 타입을 검사하는 static type 전략을 가지고 있기 때문에 **컴파일 타임의 타입검사**가 또다시 타입스크립트의 장점으로 강조된다. 
 
 ```javascript
 const addNums = (a,b) => {
@@ -88,7 +88,7 @@ float num2 = 0.0f;
 num2 = num; // 0.0
 ```
 
-반면 자바스크립트와 타입스크립트는 정수와 실수를 number 타입으로 통일해 사용한다. 
+반면 자바스크립트와 타입스크립트는 정수와 실수를 **number 타입으로 통일**해 사용한다. 
 즉, 정수 5와 실수 5.0이 타스에서는 동일하게 인식된다. 
 
 ```typescript
@@ -116,8 +116,6 @@ console.log(person.name);
 console.log(person.hobbies); // no error in javascript : undefined
 
 ```
-자바 객체의 최상위 객체가 Object인 것처럼, object도 그러하다. 
-object의 속성 타입을 지정할 수 있다. 물론 아래의 형태는 자주 사용되는것은 아니다. 객체와 인스턴스를 사용하는 방식은 뒤에서 다룬다.
 ```typescript
 // const person : {}  == const person : object
 const person : {
@@ -132,9 +130,14 @@ console.log(person.age);
 console.log(person.name);
 console.log(person.hobbies); // Property 'hobbies' does not exist on type '{ name: string; age: number; }'.
 ```
+자바 객체의 최상위 객체가 Object인 것처럼, object도 그러하다. 
+object의 속성 타입을 지정할 수 있다. 물론 위 코드처럼 객체타입을 바로 기술하는 형태는 자주 사용되는것은 아니다. 
+객체와 인스턴스를 사용하는 일반적인 방식은 뒤에서 다룬다.
+
 ## array
-배열은 요소의 타입이 동일해야 한다. 물론 `any`를 사용할 수 있지만, 타입스크립트에서 일반적인 방식은 아니다. 아래의 코드는 타입 추론을 통해 
-hobbies 배열의 타입을 `string[]`으로 인식하고 있다.
+배열은 요소의 타입이 동일해야 한다. 
+물론 `any`를 사용할 수 있지만, 타입스크립트에서 일반적인 방식은 아니다. 
+아래의 반복문은 타입 추론을 통해 hobbies 배열의 타입을 `string[]`으로 인식하고 있다.
 ```typescript
 const person = {
 	name: "John",
@@ -146,10 +149,10 @@ for (const hobby of person.hobbies) {
 }
 ```
 # 3. 타입 할당과 타입 추론
-vanilla JS를 쓰다가 타입스크립트를 쓰면 의문이 들 수 있는 부분이 타입 할당이다. 타입을 명시해서 컴파일 타임에 문제를 잡아내겠다는 의도까지는 이해되는데, 
+Vanilla JS를 쓰다가 타입스크립트를 쓰면 의문이 들 수 있는 부분이 타입 할당이다. 타입을 명시해서 컴파일 타임에 문제를 잡아내겠다는 의도까지는 이해되는데, 
 타입이 누가 봐도 자명한 상황에서는 굳이 타입을 명시 해줄 필요가 없기 때문이다. 그래서, 타임스크립트는 타입 추론(**Type Inference**)을 제공한다.
 
-선언만 하고, 바로 값을 할당하지 않는 경우에만 타입 명시를 하면 된다.
+**선언만 하고, 바로 값을 할당하지 않는 경우**에만 타입 명시를 하면 된다.
 ```typescript
 // 선언과 할당
 const num = 10;
@@ -190,7 +193,7 @@ enum Size {
 
 ## `any` 타입 
 아주 유연하게 사용할 수 있다. 선언 시 값을 할당할 필요가 없고, 여러 타입을 한꺼번에 사용할 수 있다.
-그렇지만, `any` 타입의 사용을 추천하지 않는다! 타입스크립트 컴파일러가 제공하는 타입 검사의 기능을 누리지 못하게 되기 때문이다.
+그렇지만, 앞서 언급한 것처럼 `any` 타입의 사용을 추천하지 않는다! 타입스크립트 컴파일러가 제공하는 타입 검사의 기능을 누리지 못하게 되기 때문이다.
 
 ```typescript
 let num : any;
@@ -219,7 +222,7 @@ function convertToNum (input : string | number | boolean ) {
   else return input;
 }
 ```
-union 타입도 java에는 없다. 위와 같이 method에서 여러 타입을 받아들이고 싶을땐 오버로딩을 사용한다. 
+union 타입도 java에는 없다. 위와 같이 method에서 여러 타입을 받아들이고 싶을땐 **오버로딩**을 사용한다. 
 
 ```java
 public class Converter {
@@ -246,7 +249,7 @@ public class Converter {
 ```
 
 ## 리터럴 타입
-값에 특정한 리터럴이 오는 케이스만 있을 경우 해당 리터럴을 타입처럼 사용할 수 있다.
+값에 특정한 리터럴이 오는 케이스만 있을 경우 해당 **리터럴을 타입처럼** 사용할 수 있다.
 오타가 발생한 경우 타입스크립트 컴파일러가 알려주기 때문에 휴먼 에러를 방지할 수 있다는 장점도 있다. 
 다만 리터럴 타입을 사용하는 경우 로직에 따라~~any와 비슷하게~~ 런타임에 타입 체크를 하는 코드를 작성해야 할 수 있다.
 
@@ -264,6 +267,8 @@ function convert (input : string | number , resultConversion : 'as-number' | 'as
 }
 
 console.log(convert(1,'as-number'));
+console.log(convert(1)); // 기본값 as-number
+
 // typo -> Argument of type '"as-numbe"' is not assignable to parameter of type '"as-number" | "as-text" | undefined'.
 console.log(convert(1,'as-numbe'));
 ```
@@ -278,7 +283,6 @@ const person : Person = {
     name: "John",
     age: 21
 }
-
 
 type DetailedPerson = {
     name : string;
@@ -340,7 +344,7 @@ console.log(addNums(1,2));
 console.log(addNums2(1,2));
 
 ```
-`void`를 통해 함수의 반환값이 없음을 명시할 수 있다. 자바도 가지고 있는 feature니 놀라울 것은 없지만, 자바스크립트에선 없었기 때문에 기억할 필요가 있다.
+`void`를 통해 함수의 반환값이 없음을 명시할 수 있다. 자바도 가지고 있는 feature니 놀라울 것은 없지만, 자바스크립트에선 `void`가 없었기 때문에 기억할 필요가 있다.
 ```typescript
 function printNum(num : number) : void {
     console.log(num);
@@ -348,8 +352,9 @@ function printNum(num : number) : void {
 printNum(256);
 conssole.log(printNum(512)); // undefined
 ```
-이때, void 타입의 함수를 undefined로 반환한다. 더불어, undefined로 반환타입을 명시했다면 반드시 return문이 있어야 한다.
-특이하다. 물론, undefined를 반환타입으로 사용하는 것은 흔치 않다고 한다.
+이때, void 타입의 함수를 undefined로 반환한다. 
+더불어, void가 아닌 undefined로 반환타입을 명시했다면 반드시 return문이 있어야 한다.
+물론, undefined를 반환타입으로 사용하는 것은 흔치 않다고 한다.
 ```typescript
 function printNum(num : number) : undefined {
     console.log(num);
@@ -357,7 +362,8 @@ function printNum(num : number) : undefined {
 }
 ```
 ### First Class Citizen
-함수의 파라미터로 넘어가고, 함수의 반환값이 되고, 변수에 담길 수 있다면  First Class CItizen으로 분류된다. 함수가 일급이 될 수 있냐에 따라 함수형 프로그래밍과 연관성이 달라진다. 자바스크립트에선 가능한 반면, Java에서는 함수를 First Class Citizen으로 보지 않는다. 
+함수의 파라미터로 넘어가고, 함수의 반환값이 되고, 변수에 담길 수 있다면  First Class Citizen으로 분류된다. 
+함수가 일급이 될 수 있냐에 따라 함수형 프로그래밍과의 연관성이 달라진다. 자바스크립트에선 가능한 반면, Java에서는 객체 지향적 설계를 가지며, 함수를 First Class Citizen으로 보지 않는다. 
 
 > 함수가 **First Class Citizen** 이 되려면
 > - 함수가 함수의 파라미터로 넘어갈 수 있다.
@@ -367,8 +373,25 @@ function printNum(num : number) : undefined {
 ```typescript
 let addNums : (a:number, b: number) => number;
 ```
+위와 같이 함수의 시그니처를 정의할 수 있다. 위 정의를 기반으로 함수의 타입 검사를 수행한다. 
+```typescript
+function covertToInt(input : string) {
+    return parseFloat(input);
+}
+let convert : (input : string) => number;
 
-자바는 객체 지향 언어이지만, 함수형프로그래밍을 지원하기 위한 도구로 Functional Interface를 지원한다. 
+convert = covertToInt;
+console.log(convert('1')); 
+
+function error(input : string | number) {
+    return input;
+}
+// Type '(input: string | number) => string | number' is not assignable to type '(input: string) => number'.
+//  Type 'string | number' is not assignable to type 'number'.
+convert = error;
+```
+
+자바는 함수형프로그래밍을 지원하기 위한 도구로 함수형 인터페이스(**Functional Interface**)를 지원한다. 
 ```java
 ... 
 public interface FunctionalInterface {
@@ -394,3 +417,7 @@ addAndHandle(10, 20, (result) => {
   console.log(result);
 });
 ```
+
+## Reference
+- https://en.wikipedia.org/wiki/First-class_citizen
+- https://www.udemy.com/course/best-typescript-21/

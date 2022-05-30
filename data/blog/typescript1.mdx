@@ -1,0 +1,396 @@
+---
+title: 'Java 개발자를 위한 Typescript 정리 -Basic'
+thumbSrc: '/static/images/typescript.webp'
+date: '2022-05-28'
+tags: ['typescript']
+draft: false
+summary: '타입스크립트의 기본 문법을 Java와 비교하며 정리합니다.'
+images: ['/static/images/typescript.webp']
+---
+
+# 📌 목차
+
+![typescript](/static/images/typescript.webp)
+
+- **1. 타입스크립트의 필요성**
+- **2. 주요 타입**
+- **3. 타입 할당과 타입 추론**
+- **4. 다른 타입들**
+
+---
+
+# 1. 타입스크립트의 필요성
+C, C++, Java 등은 강타입 언어이다. 프로그래머가 변수의 타입을 명시할 것을 강제한다. 
+타입의 부재로 인한 여러가지 문제의 가능성을 compile 타임에 차단해준다.  
+
+문법 검사 기능을 제공하는 IDE나 에디터에서 문제를 인식하고 불평할 수 있다.
+
+```java
+public class Main
+{
+	public static void main(String[] args) {
+        // error : incompatible types: String cannot be converted to int
+		System.out.println(addNums("a",1)); 
+	}
+	public static int addNums (int a, int b) {
+	    return a+b;
+	}
+} 
+```
+
+반면 자바스크립트는 기본적으로 약타입 언어이다. 언어에 타입은 존재하지만, 변수를 선언할때 타입을 명시하지 않는다. 타입명시의 부재로 인한 문제 가능성을 사전에 차단하지 못한다.
+```javascript
+const addNums = (a,b)=>  {
+    return a+b;
+}
+addNums("a",1); // 결과 : a1 (의도하지 않은 입력값과 결과 - string concatenation 으로 작동)
+```
+타입스크립트는 자바스크립트의 **Super Set**으로서, 타입명시는 물론이고 제너릭/인터페이스 등 다른 언어에서 지원하는 특성들을 사용할 수 있다. 
+브라우저상에서 실행되기전에 타입스크립트를 자바스크립트 코드로 컴파일해 사전에 여러 문제의 가능성을 차단할 수 있는 방식으로 작동한다. 
+
+> 타입스크립트에서 에러 메세지는 던져주지만 자바스크립트코드로의 변환은 일어난다. (`ex) app.tsx -> app.js`)  
+
+```typescript
+const addNums = (a : number, b : number)=>  {  
+    return a+b;
+}
+// Argument of type 'string' is not assignable to parameter of type 'number'.
+addNums("a",1); 
+```
+
+> *[타입스크립트 플레이그라운드](https://www.typescriptlang.org/play/)에서 여러가지 코드를 실험해볼 수 있다.*
+
+물론 타입스크립트를 사용하지 않고 자바스크립트만 사용해 타입을 체크할 수 있다. 
+아래는 `typeof` 연산자를 사용해 사용자의 입력값이 number 타입이 아니라면 에러를 생성하는 코드이다. 
+이는 런타임에 에러를 생성한다는 측면에서 사용자경험을 악화시킬 위험성을 가진다. 
+자바스크립트는 런타임에 타입을 검사하는 dynamic type언어이기 때문이다. 
+
+반면 typescript는 컴파일타임에 타입을 검사하는 static type 전략을 가지고 있기 때문에 컴파일 타임의 검사가 또다시 타입스크립트의 장점으로 강조된다. 
+
+```javascript
+const addNums = (a,b) => {
+	if(typeof(a) !== "number" || typeof(b) !== "number") {
+		throw new Error("invalid number");
+	}
+	return a+b;
+};
+```
+
+# 2. 주요 타입
+이 타입들은 자바스크립트에서도 존재하는 타입으로, 타입스크립트와 자바스크립트에서 모두 사용가능하다.
+
+## number
+Java에서는 정수와 실수를 별도의 타입으로 구분한다. 
+```java
+int num = 0;
+num = 0.0; //error : incompatible types: possible lossy conversion from double to int
+float num2 = 0.0f;
+num2 = num; // 0.0
+```
+
+반면 자바스크립트와 타입스크립트는 정수와 실수를 number 타입으로 통일해 사용한다. 
+즉, 정수 5와 실수 5.0이 타스에서는 동일하게 인식된다. 
+
+```typescript
+const num : number = 10;
+const num2 : number = 10.0;
+```
+## string
+string 타입은  큰따옴표(""), 작은따옴표(''). 백틱(``)으로 표현할 수 있다. 백틱은 표현할 문자열을 동적으로 주입시키는 template literal 에서 사용된다.
+```typescript
+const num : number = 10;
+console.log(`number: ${num}`); // number : 10
+```
+## boolean
+boolean 타입은 true 또는 false 둘중 하나의 값만을 가지며, 비교 연산자 등의 결과값으로 반환되는 경우가 많다. 즉, if문과 같은 조건문에서 참, 거짓에 대한 조건 분기를 위해 많이 사용한다.
+## object 
+자바스크립트에서는 없는 요소에 대해 undefined으로 표시하지만, 타입스크립트에서는 요소의 정의와 존재여부를 검사해준다. 
+```javascript
+const person = {
+	name: "John",
+	age: 21
+}
+
+console.log(person.age);
+console.log(person.name);
+console.log(person.hobbies); // no error in javascript : undefined
+
+```
+자바 객체의 최상위 객체가 Object인 것처럼, object도 그러하다. 
+object의 속성 타입을 지정할 수 있다. 물론 아래의 형태는 자주 사용되는것은 아니다. 객체와 인스턴스를 사용하는 방식은 뒤에서 다룬다.
+```typescript
+// const person : {}  == const person : object
+const person : {
+	name : string;
+	age : number;
+} = {
+	name: "John",
+	age: 21
+}
+
+console.log(person.age);
+console.log(person.name);
+console.log(person.hobbies); // Property 'hobbies' does not exist on type '{ name: string; age: number; }'.
+```
+## array
+배열은 요소의 타입이 동일해야 한다. 물론 `any`를 사용할 수 있지만, 타입스크립트에서 일반적인 방식은 아니다. 아래의 코드는 타입 추론을 통해 
+hobbies 배열의 타입을 `string[]`으로 인식하고 있다.
+```typescript
+const person = {
+	name: "John",
+	age: 21,
+	hobbies : ['Soccer','Tennis','Taking Pictures']
+}
+for (const hobby of person.hobbies) {
+    console.log(hobby); // string
+}
+```
+# 3. 타입 할당과 타입 추론
+vanilla JS를 쓰다가 타입스크립트를 쓰면 의문이 들 수 있는 부분이 타입 할당이다. 타입을 명시해서 컴파일 타임에 문제를 잡아내겠다는 의도까지는 이해되는데, 
+타입이 누가 봐도 자명한 상황에서는 굳이 타입을 명시 해줄 필요가 없기 때문이다. 그래서, 타임스크립트는 타입 추론(**Type Inference**)을 제공한다.
+
+선언만 하고, 바로 값을 할당하지 않는 경우에만 타입 명시를 하면 된다.
+```typescript
+// 선언과 할당
+const num = 10;
+const isNum = true;
+console.log(`number: ${num}`); // number : 10
+console.log(`isNum: ${isNum}`); // isNum : true
+
+// 선언
+let str : string;
+// 할당
+str = 'string';
+str = 5; // error : 'number' 형식은 'string' 형식에 할당할 수 없습니다.
+```
+
+# 4. 다른 타입들
+자바스크립트에서는 없지만, 타입스크립트는 있는 타입들이다. 
+## tuple
+튜플은 고정된 길이를 가지고, 여러 타입의 요소를 가질 수 있는 배열이다. 인덱스 별로 타입을 지정할 수 있다. 
+> 고정된 길이를 가지지만, const 배열도 push가 가능하듯이 tuple도 가능하다.
+```typescript
+let users [string, string ,boolean][];
+user = [['1','Tina',true],['2','Lion',false]];
+```
+## enum
+0부터 순서대로 값이 매핑된다. 0이 아닌 값을 매핑하려면 직접 할당해준다. 보통 열거형은 프로그래머의 가독성있는 처리를 위해 사용되고, 타입스크립트에서도 비슷한 용례를 가진다.
+```typescript
+enum User {
+    ADMIN, // 0 
+    READONLY, // 1 
+    USER // 2 
+}
+enum Size {
+    S = 'small',
+    M = 'medium',
+    L = 'large'
+}
+```
+
+## `any` 타입 
+아주 유연하게 사용할 수 있다. 선언 시 값을 할당할 필요가 없고, 여러 타입을 한꺼번에 사용할 수 있다.
+그렇지만, `any` 타입의 사용을 추천하지 않는다! 타입스크립트 컴파일러가 제공하는 타입 검사의 기능을 누리지 못하게 되기 때문이다.
+
+```typescript
+let num : any;
+num = 3; // no error
+num = '3'; // no error
+num = true; // no error
+```
+`any` 타입은 java에는 없는 타입이다. 강타입 언어인 자바에서 `any` 타입이 없는 것은 자연스럽다고 느껴진다. 자바에선 위와 같은 상황에 타입 유연성을 가지기 위한 전략으로 주로 제네릭을 사용한다.
+
+## union 타입(`|`) 
+조합 타입은 `|` 기호를 이용해 타입을 여러개로 지정할 수 있다. 
+
+```typescript
+let value : number | string;
+value = 3;
+value = 'a';
+value = true;
+
+function convertToNum (input : string | number | boolean ) {
+  if(typeof(input) === 'string') {
+    return +input;
+  }
+  else if(typeof(input) === 'boolean') { 
+    return input? 1 : 0;
+  }
+  else return input;
+}
+```
+union 타입도 java에는 없다. 위와 같이 method에서 여러 타입을 받아들이고 싶을땐 오버로딩을 사용한다. 
+
+```java
+public class Converter {
+  int convertToNum(boolean input) {
+      return input? 1:0;
+  }
+
+  int convertToNum(String input) {
+      return Integer.valueOf(input);
+  }
+
+  int convertToNum(double input) {
+      return (int)input;
+  }
+
+  public static void main(String[] args) {
+    Converter converter = new Converter();
+    
+    System.out.println(Converter.convertToNum(true));
+    System.out.println(Converter.convertToNum("10"));
+    System.out.println(Converter.convertToNum(10.2)); 
+  }
+}
+```
+
+## 리터럴 타입
+값에 특정한 리터럴이 오는 케이스만 있을 경우 해당 리터럴을 타입처럼 사용할 수 있다.
+오타가 발생한 경우 타입스크립트 컴파일러가 알려주기 때문에 휴먼 에러를 방지할 수 있다는 장점도 있다. 
+다만 리터럴 타입을 사용하는 경우 로직에 따라~~any와 비슷하게~~ 런타임에 타입 체크를 하는 코드를 작성해야 할 수 있다.
+
+```typescript
+function convert (input : string | number , resultConversion : 'as-number' | 'as-text' = 'as-number') {
+  if(resultConversion === 'as-number') {
+      return +input;
+  }
+  else if(resultConversion === 'as-text') {
+    return typeof(input) === 'number' ? input.toString() : input;
+  }
+  else {
+    throw new Error('invalid input');
+  }
+}
+
+console.log(convert(1,'as-number'));
+// typo -> Argument of type '"as-numbe"' is not assignable to parameter of type '"as-number" | "as-text" | undefined'.
+console.log(convert(1,'as-numbe'));
+```
+
+## 타입 Alias (`type`)
+타입의 별칭을 사용할 수 있다. 앞서 언급 했던 코드를 `type` 키워드를 통해 타입의 별칭을 정의하고, 참조하는 방식으로 사용해 
+코드의 가독성을 향상시킬 수 있다.  
+ 
+```typescript
+type Person = { name: string, age: number};
+const person : Person = {
+    name: "John",
+    age: 21
+}
+
+
+type DetailedPerson = {
+    name : string;
+    age : number | string;
+    gender : number | string | boolean
+}
+
+const person : DetailedPerson = {
+  name: 'Tina',
+  age : 25,
+  gender : 'Female'
+} 
+
+const person2 : DetailedPerson = {
+  name: 'CM',
+  age : '35',
+  gender : false
+}
+```
+
+> type은 interface와 다르게 새로운 요소를 정의 할 수 없다. 뒤에서 자세하게 다룬다.
+
+java에서는 원시 타입을 제외하곤 모든 타입을 user-defined type으로 보기 때문에 기존 자바 `class`를 선언하는 방식대로 타입을 처리할 수 있다.
+
+```java
+public class App {
+
+  class Person {
+    String name = "";
+    int age = 0;
+  
+    Person(String name, int age) {
+      this.name = name;
+      this.age = age;
+    }
+
+    public String toString() {
+      return "name: "+this.name +", age: "+this.age;
+    }
+  }
+  
+  public static void main(String[] args) {
+    App.Person person = new App().new Person("Tina",25);
+    System.out.println(person.toString());
+  }
+}
+```
+## Function
+### 반환값과 void
+typescirpt에서 함수의 반환값을 타입추론을 통해 명시하지 않을 수 있다.
+```typescript
+function addNums(a :number, b: number) : number{
+    return a+b;
+}
+function addNums2 (a :number, b: number) {
+    return a+b;
+}
+console.log(addNums(1,2));
+console.log(addNums2(1,2));
+
+```
+`void`를 통해 함수의 반환값이 없음을 명시할 수 있다. 자바도 가지고 있는 feature니 놀라울 것은 없지만, 자바스크립트에선 없었기 때문에 기억할 필요가 있다.
+```typescript
+function printNum(num : number) : void {
+    console.log(num);
+}
+printNum(256);
+conssole.log(printNum(512)); // undefined
+```
+이때, void 타입의 함수를 undefined로 반환한다. 더불어, undefined로 반환타입을 명시했다면 반드시 return문이 있어야 한다.
+특이하다. 물론, undefined를 반환타입으로 사용하는 것은 흔치 않다고 한다.
+```typescript
+function printNum(num : number) : undefined {
+    console.log(num);
+    return undefined;
+}
+```
+### First Class Citizen
+함수의 파라미터로 넘어가고, 함수의 반환값이 되고, 변수에 담길 수 있다면  First Class CItizen으로 분류된다. 함수가 일급이 될 수 있냐에 따라 함수형 프로그래밍과 연관성이 달라진다. 자바스크립트에선 가능한 반면, Java에서는 함수를 First Class Citizen으로 보지 않는다. 
+
+> 함수가 **First Class Citizen** 이 되려면
+> - 함수가 함수의 파라미터로 넘어갈 수 있다.
+> - 함수가 함수의 반환값이 될 수 있다.
+> - 함수가 변수에 담길 수 있다.
+
+```typescript
+let addNums : (a:number, b: number) => number;
+```
+
+자바는 객체 지향 언어이지만, 함수형프로그래밍을 지원하기 위한 도구로 Functional Interface를 지원한다. 
+```java
+... 
+public interface FunctionalInterface {
+     public abstract int convertToInt(String text);
+  }
+
+  public static void main(String[] args) {
+    App.FunctionalInterface func = text -> Integer.valueOf(text);
+    System.out.println(func.convertToInt("1"));
+  }
+...
+```
+
+### 콜백
+콜백 함수에 대해서도 파라미터 타입과 반환타입을 지정해서 타입 검사를 강제할 수 있다.
+```typescript
+function addAndHandle(n1: number, n2: number, cb: (num: number) => void) {
+  const result = n1 + n2;
+  cb(result);
+}
+
+addAndHandle(10, 20, (result) => {
+  console.log(result);
+});
+```

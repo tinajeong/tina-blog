@@ -1,7 +1,7 @@
 ---
 title: 'ES6'
 thumbSrc: '/static/images/es6.png'
-date: '2022-06-05'
+date: '2022-06-04'
 tags: ['typescript','javascript','es6']
 draft: false
 summary: 'es6 문법을 정리했습니다. 그런데 이제 typescript를 곁들인..'
@@ -30,14 +30,39 @@ let, const는 es6에 추가된 문법이다. let은 변수에 할당된 값을 �
 let name = 'tina'
 console.log(name);
 console.log(job); // Uncaught ReferenceError: job is not defined
-
-console.log(dontUse); // var
-var dontUse = "var";
-console.log(dontUse); // var
 ```
+## var
+### 전역유효범위를 가진 var
+```typescript
+var result;
+function add(a: number , b: number) {
+	result = a+b;
+	return result;
+}
+
+console.log(result);
+```
+
+### 함수유효범위를 가진 var
+```typescript
+function add(a: number , b: number) {
+	var result = a+b;
+	return result;
+}
+
+console.log(result); // ReferenceError: result is not defined
+```
+var 가 전역변수로 선언된 경우 바람직하지 않은 var hoisting이 일어난다. 
+
 > hoisting은 선언 위치와 상관없이 선언을 파일 가장 위로 끌어 올려주는 것(hoisting)이다. 
 
-var hoisting은 위 사례와 같이 위험하기 때문에 var는 되도록 사용하지 않아야 한다.
+```typescript
+console.log(dontUse); // undefined
+var dontUse;
+dontUse = "var";
+console.log(dontUse); // var
+```
+`dontUse`에 아직 값이 할당되지 않은 상태에서 `undefined` 값에 접근하고, 아무런 에러메세지를 표시하지 않는다. var는 되도록 사용하지 않아야 한다.
 
 # 2. 화살표 함수
 자바스크립트에서는 화살표 함수를 사용해 코드양을 줄일 수 있다. `function` 키워드를 명시할 필요가 없기 때문이다. 

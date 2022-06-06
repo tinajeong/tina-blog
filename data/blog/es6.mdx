@@ -18,9 +18,9 @@ images: ['/static/images/es6.png']
 
 ---
 
-# 1. let, const
+# 1. `let`, `const`
 
-let, const는 es6에 추가된 문법이다. let은 변수에 할당된 값을 재할당할 수 있지만, const는 상수로서 기능한다. 변수의 immutable을 보장하는 키워드이다. 
+let, const는 es6에 추가된 문법이다. let은 변수에 할당된 값을 재할당할 수 있지만, const는 상수로서 기능한다. 변수값을 재할당할 수 없음을(**immutable**) 보장하는 키워드이다. 
 선언과 동시에 값을 할당하고 다른 값을 재대입하면 에러가 발생한다. 일반적으로 const의 사용을 권장한다.
 
 ```javascript
@@ -28,18 +28,33 @@ let, const는 es6에 추가된 문법이다. let은 변수에 할당된 값을 �
     let job = 'developer'
 }
 let name = 'tina'
+const constant = 1;
+constant = 2; // error : Assignment to constant variable
+
 console.log(name);
 console.log(job); // Uncaught ReferenceError: job is not defined
 ```
 ## var
+
+let과 const가 등장하기 전에는 var 키워드를 통해 변수를 선언했다. var는 값을 언제든지 재할당할 수 있으며, 소속된 scope 상에서 hoisting된다.
+var는 global scope와 function scope 둘 중 하나로 구분된다. 
+
+> hoisting은 선언 위치와 상관없이 선언을 scope상 가장 위로 끌어 올려주는 것이다. 
+
+> hoist : If you hoist something heavy somewhere, you lift it or pull it up there. 
+(출처: Collins Cobuild)
+
 ### 전역유효범위를 가진 var
 ```typescript
-var result;
+var result; // undefined
 function add(a: number , b: number) {
 	result = a+b;
 	return result;
 }
-
+console.log(isGlobal) // true
+{
+    var isGlobal = true;
+}
 console.log(result);
 ```
 
@@ -52,9 +67,7 @@ function add(a: number , b: number) {
 
 console.log(result); // ReferenceError: result is not defined
 ```
-var 가 전역변수로 선언된 경우 바람직하지 않은 var hoisting이 일어난다. 
-
-> hoisting은 선언 위치와 상관없이 선언을 파일 가장 위로 끌어 올려주는 것(hoisting)이다. 
+var 가 전역변수로 선언된 경우 var hoisting으로 인한 예측하지 못한 문제가 생길 수 있다.
 
 ```typescript
 console.log(dontUse); // undefined
@@ -62,12 +75,13 @@ var dontUse;
 dontUse = "var";
 console.log(dontUse); // var
 ```
-`dontUse`에 아직 값이 할당되지 않은 상태에서 `undefined` 값에 접근하고, 아무런 에러메세지를 표시하지 않는다. var는 되도록 사용하지 않아야 한다.
+`dontUse`에 아직 값이 할당되지 않은 상태에서 `undefined` 값에 접근하고, 아무런 에러메세지를 표시하지 않는다. 그러므로 var는 되도록 사용하지 않아야 한다.
 
 # 2. 화살표 함수
 자바스크립트에서는 화살표 함수를 사용해 코드양을 줄일 수 있다. `function` 키워드를 명시할 필요가 없기 때문이다. 
 아래 코드의 경우 파라미터가 없기 때문에 파라미터 부분을 `()`로 표시했다. 
 `addEventListener` 처럼 함수 파라미터가 필요한 경우에도 typescript가 Dom을 인식하기 때문에 타입을 명시해줄 필요가 없다. 
+
 ```typescript
 let sayHi = function() {
   alert( "Hello" );
@@ -133,5 +147,6 @@ console.log(userName, age, person);
 ```
 
 ## Reference
+- https://www.collinsdictionary.com/dictionary/english/hoist
 - https://kangax.github.io/compat-table/es6/
 - https://academind.com/tutorials/reference-vs-primitive-values

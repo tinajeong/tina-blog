@@ -1,0 +1,622 @@
+---
+title: 'Java 개발자를 위한 Typescript 정리 -Class와 Interface'
+thumbSrc: '/static/images/typescript.webp'
+date: '2022-06-05'
+tags: ['typescript']
+draft: false
+summary: '타입스크립트의 클래스와 인터페이스를 자바와 비교하며 정리합니다.'
+images: ['/static/images/typescript.webp']
+---
+
+# 📌 목차
+
+![typescript](/static/images/typescript.webp)
+
+- **1. OOP**
+- **2. 생성자 함수와 `this`**
+- **3. 제어자**
+- **4. 상속**
+- **5. 인터페이스**
+
+---
+
+## 1. OOP?
+OOP는 **Object Oriented Programming**의 줄임말이다. 
+
+객체지향은 프로그래밍에서 필요한 데이터를 추상화시켜 상태와 행위를 가진 객체를 만들고 그 객체들 간의 유기적인 상호작용을 통해 로직을 구성하는 프로그래밍 방법이다.
+  
+예를 들어 LG 노트북 그램이 있다. 우리 생활 속 수많은 객체 중 하나인 그램과 관련된 데이터를 생각해본다. 
+실제로 노트북이 하는 일은 아주 많지만 2가지만 연상한다.
+켜진 상태와 꺼진 상태, 저장 장치에 저장된 파일의 개수가 있다. 이에 관련된 행위(작업)은 전원을 키고 끄기, 파일을 삭제하는 행위가 있다.
+노트북 이름을 저장하는 name, on/off 상태를 나타내는 flag가 있으며, 데이터와 관련된 행위를 구현한 메소드등으로 명명한다.
+이 내용을 코드로 옮기면 class가 된다. 그러므로 **클래스는 객체의 설계도**라고 볼 수 있다.
+
+
+```java
+public class LgGram{
+
+    private String name;
+    private boolean flag;
+    
+    public LgGram() {
+    }
+    
+    public LgGram(String name, boolean flag) {
+        this.name = name;
+        this.flag = flag;
+    }
+}
+...
+LgGram zDGram = new LgGram("15ZD90N-VX50K",false);
+```
+위 코드를 typescript로 바꾸면 다음과 같다. `constructor`는 자바스크립트의 reserved word로, 타입스크립트에서도 사용할 수 있다.
+또, `class`를 사용했을때 `es5` 내부적으로는 생성자 함수를 호출하는 방식으로 실행된다.
+
+```typescript
+class LgGram {
+  private name: string;
+  private flag: boolean;
+  constructor(name: string, flag: boolean) {
+    this.name = name;
+    this.flag = flag;
+  }
+}
+...
+zDGram : LgGram = new LgGram('15ZD90N-VX50K',false);
+```
+
+### es5
+```javascript
+var LgGram = /** @class */ (function () {
+    function LgGram(name, flag) {
+        this.name = name;
+        this.flag = flag;
+    }
+    return LgGram;
+}());
+```
+### es6
+```javascript
+"use strict";
+class LgGram {
+    constructor(name, flag) {
+        this.name = name;
+        this.flag = flag;
+    }
+}
+```
+### 설계도 vs 실물
+class가 설계도라면, instance는 설계도를 통해 제작된 실물이라고 볼 수 있다. 즉, 데이터를 기반으로 행위할 수 있는 주체이다. 
+object는 넓은 의미로 사용된다. instance를 의미할 때도 사용하며, 단순히 실생활에서의 객체를 말할 때도 사용한다.
+고로 실제 그램 노트북도 instance이면서 object이다.
+
+## 2. 생성자 함수와 `this`
+
+클래스의 필드와 관련된 함수를 정의할 수 있다. 노트북을 키고 끄는 메소드를 정의했다.
+```java
+public class LgGram{
+
+    private tring name;
+    private boolean flag;
+    
+    public LgGram() {
+    }
+    
+    public LgGram(String name, boolean flag) {
+        this.name = name;
+        this.numOfFiles = numOfFiles;
+        this.flag = flag;
+    }
+
+    void turnOn() {
+        if(!flag) flag= true;
+        System.out.println("turn on "+name);
+    }
+
+    void turnOff() {
+        if(flag) flag= false;
+        System.out.println("turn off "+name);
+    }
+
+}
+```
+
+타입스크립트로 변환하면 다음과 같다. 자바와 다른 점은 `this` 키워드를 이용해 필드에 접근하지 않으면, 해당 파일의 **전역변수를 참조**하기 때문에 정의된 변수가 없을 경우 에러가 발생한다.
+뿐만 아니라, 애초에 `this` 키워드를 명시하지 않으면 멤버 필드를 참조할 수 없기 때문에 반드시 `this`를 이용해 클래스의 필드와 함수에 접근해야 한다.
+```typescript
+class LgGram {
+  private name: string;
+  private flag: boolean;
+  constructor(name: string, flag: boolean) {
+    this.name = name;
+    this.flag = flag;
+  }
+
+  turnOn(this : LgGram) {
+    this.flag = true;
+    console.log("turn on " + this.flag);
+  }
+  turnOff(this : LgGram) {
+   this.flag = false;
+   console.log("turn off " + this.flag);
+  }
+  
+}
+
+const zdGram : LgGram = new LgGram("15ZD90N-VX50K",false);
+zdGram.turnOn();
+```
+### 타입스크립트에서 this의 효과 
+위 코드의 turnOn, turnOff 함수에 대해 this 지시자와 타입명을 명시해주었다. 이렇게 함으로써 해당 클래스에 의존성을 가지는 함수나 객체에 대해 좀더 효과적인 타입 체크가 가능하다.
+
+```typescript
+const copiedZdGram = { turnOff : zdGram.turnOff};
+// Type '{ turnOff: (this: LgGram) => void; }' is missing the following properties from type 'LgGram': name, flag, turnOn, test
+copiedZdGram.turnOff(); 
+```
+### 약식 초기화 
+typescript에서는 constructor 함수를 호출할 때 좀더 단순화된 형태의 멤버변수 기술이 가능하다. 
+```typescript
+class LgGram {
+  constructor(name: string, flag: boolean) {
+    this.name = name;
+    this.flag = flag;
+  }
+
+  turnOn(this : LgGram) {
+    this.flag = true;
+    console.log("turn on " + this.flag);
+  }
+  turnOff(this : LgGram) {
+   this.flag = false;
+   console.log("turn off " + this.flag);
+  }
+  
+}
+
+```
+## 3. 제어자 
+자바에서는 `public`, `protected`, `(default)`, `private` 제어자가 존재한다.  
+
+private로 외부에서 내부 데이터의 직접적인 접근을 막고, 외부에서는 public 메소드로 내부데이터를 제어하도록 
+하는 `캡슐화`*encapsulation*를 권장하고 있다. 
+```java
+public class LgGram{
+
+    private String name;
+    private boolean flag;
+    
+    public LgGram() {
+    }
+    
+    public LgGram(String name, boolean flag) {
+        this.name = name;
+        this.numOfFiles = numOfFiles;
+        this.flag = flag;
+    }
+
+    void turnOn() {
+        if(!flag) flag= true;
+        System.out.println("turn on "+name);
+    }
+
+    void turnOff() {
+        if(flag) flag= false;
+        System.out.println("turn off "+name);
+    }
+
+}
+```
+
+타입스크립트와 **최신** 자바스크립트에서는 public과 private 등의 제어자가 존재하지만, default는 public이다. 즉, 꽤 최근까지 자바스크립트는 public과 private를
+구별하지 않았고, 멤버변수들이 **public으로 일괄 간주**되었다.
+
+```typescript
+
+class LgGram {
+  private name: string;
+  private flag: boolean;
+  constructor(name: string, flag: boolean) {
+    this.name = name;
+    this.flag = flag;
+  }
+
+  turnOn(this : LgGram) {
+    this.flag = true;
+    console.log("turn on " + this.flag);
+  }
+  turnOff(this : LgGram) {
+   this.flag = false;
+   console.log("turn off " + this.flag);
+  }
+  
+}
+
+const zdGram : LgGram = new LgGram("15ZD90N-VX50K",false);
+zdGram.turnOn();
+zdGram.name // error
+```
+
+## 4. 상속
+상속은 부모 클래스에 공통의 특징을 몰아넣고, 자식 클래스에서 **추가적인 사항**이 더해지는 구조이다. 
+아래는 노트북의 공통적인 특징을 `Laptop` 클래스에 몰아넣고, `LgGram` 클래스에서 파워세이브 모드를 추가한 자바코드이다. 
+```java
+public class Laptop{
+
+    private String name;
+    private boolean flag;
+    
+    public Laptop() {
+    }
+    
+    public Laptop(String name, boolean flag) {
+        this.name = name;
+        this.flag = flag;
+    }
+
+    void turnOn() {
+        if(!flag) flag= true;
+        System.out.println("turn on ["+name+"]");
+    }
+    void turnOff() {
+        if(flag) flag= false;
+        System.out.println("turn off ["+name+"]");
+    }
+
+}
+public class LgGram extends Laptop{
+
+    private boolean isPowerSave;
+    public LgGram() {
+    }
+    
+    public LgGram(String name, boolean flag) {
+        this.name = name;
+        this.numOfFiles = numOfFiles;
+        this.flag = flag;
+    }
+
+    @Override
+    void turnOn() {
+       super.turnOn();
+    }
+    @Override
+    void turnOff() {
+        super.turnOff();
+    }
+    void saveOn() {
+        if(!isPowerSave) isPowerSave= true;
+        System.out.println("save On");
+    }
+    void saveOff() {
+        if(isPowerSave) isPowerSave= false;
+        System.out.println("save Off ");
+    }
+
+}
+```
+타입스크립트에서도 `extends` 키워드를 통해 상속을 구현할 수 있다. `super`를 통한 부모 클래스의 생성자 함수를 반드시 호출해야한다는 점에서 자바와 다르다.  
+
+아래 코드에서 상속을 통해 메소드를 재정의하지 않고도 부모함수의 `turnOn()` 함수를 사용하는 것을 볼 수 있다.
+```typescript
+class Laptop {
+  constructor(private name: string, private flag: boolean) {
+    this.name = name;
+    this.flag = flag;
+  }
+
+  turnOn(this : Laptop) {
+    this.flag = true;
+  }
+  turnOff(this : Laptop) {
+   this.flag = false;
+  }
+
+}  
+
+class LgGram extends Laptop {
+  constructor(name: string, flag: boolean, private isPowerSave : boolean) {
+    super(name,flag);
+    this.isPowerSave = isPowerSave;
+  }
+  
+  saveOn() : void {
+      if(!this.isPowerSave) this.isPowerSave= true;
+      console.log("save On");
+  }
+  saveOff() : void {
+      if(this.isPowerSave) this.isPowerSave= false;
+      console.log("save Off ");
+  }
+}
+
+const zdGram : LgGram = new LgGram("zd",false, false);
+zdGram.turnOn();
+zdGram.saveOn();
+```
+
+### 함수 재정의 
+`LgGram`에서 `turnOn`이나 `turnOff` 함수를 재정의하면서 flag 값에 접근하려고 하면 에러가 발생한다. 접근제어자가 private로 지정되었기 때문이다. 
+이럴땐 자바에선 (default)나 `protected` 접근 제어자를 사용해 패키지나 자식클래스에서만 접근할 수 있도록 수정한다. 타입스크립트에서도 `protected` 제어자를 지원한다.
+
+> 함수를 재정의하면 부모클래스의 원래 함수를 호출하지 않는다. `super` 키워드를 사용하지 않는 이상! ex) super.turnOn();
+
+```java
+public class Laptop{
+
+    String name;
+    boolean flag;
+    ...
+
+}
+public class LgGram extends Laptop{
+    
+    ...
+
+    @Override
+    void turnOn() {
+       this.flag = true;
+       this.isPowerSave = true;
+    }
+    @Override
+    void turnOff() {
+        this.flag = false;
+        this.isPowerSave = false;
+    }
+}
+```
+
+```typescript
+class Laptop {
+  constructor(protected name: string, protected flag: boolean) {
+    this.name = name;
+    this.flag = flag;
+  }
+  ...
+}
+class LgGram extends Laptop {
+  ...
+  turnOn(this : LgGram) {
+    this.flag = true;
+    this.isPowerSave = true;
+  }  
+}
+```
+
+### 게터와 세터
+files라는 멤버변수를 추가하고, 해당 변수의 가장 최근 파일을 가져오는 코드를 구현하였다. 자바의 게터와 세터는 별다른 기능없이 변수를 세팅하고, 값을 얻어오는 구조가 많다.
+반면 타입스크립트의 게터와 세터는 비즈니스로직을 삽입하는 것이 일반적인 구현이다. encapsulation의 원칙에 좀더 부합하는 컨벤션이라는 생각이 들었다.
+```typescript
+class Laptop {
+  constructor(protected name: string, protected flag: boolean, protected files : string[]) {
+    this.name = name;
+    this.flag = flag;
+    this.files = files;
+  }
+
+  get getMostRecentFile() {
+      if (this.files.length < 1) {
+          throw new Error("There are no files");
+      }
+      return this.files[0];
+  }
+
+  set setMostRecentFile(file :string) {
+      if(file.length < 1) {
+          throw new Error("Please enter a valid file name");
+      }
+      this.files.unshift(file);
+  }
+
+}  
+
+const zdGram : LgGram = new LgGram("zd",false,[],false);
+zdGram.setMostRecentFile = "myfile.txt";
+console.log(zdGram.getMostRecentFile);
+```
+### 정적인 속성과 메소드
+인스턴스와 무관하게 클래스 단위의 전역변수나 메소드를 사용하기 위한 방편으로 `static`을 사용할 수 있다. 이 역시 자바와 유사한 활용이다.
+```typescript
+class LgGram extends Laptop {
+  static brand = "LG Electronics";
+
+  static getBrand() {
+    return LgGram.brand;
+  }
+  ...
+}
+
+console.log(LgGram.brand);
+console.log(LgGram.getBrand());
+```
+
+### 추상클래스 
+클래스별로 함수 구현은 다르지만, 동일한 함수 시그니처를 강제하고 싶은 경우 추상클래스를 사용한다. 
+타입스크립트의 추상클래스는 다음과 같은 특징을 가진다.
+
+> 1. 추상클래스를 인스턴스화 할 수 없다. 
+> 2. 추상클래스의 자식 클래스는 반드시 추상클래스에 선언된 스펙 형태의 함수를 구현해야 한다.
+> 3. 추상클래스의 추상함수는 구현부를 가질 수 없다.
+
+```typescript
+abstract class PersonalComputer {
+    abstract turnOn() :void;
+    abstract turnOff() :void;
+}
+class Laptop extends PersonalComputer{
+    constructor(protected name: string, protected flag: boolean, protected files : string[]) {
+        super();
+        this.name = name;
+        this.flag = flag;
+        this.files = files;
+    }
+}
+```
+
+### 싱글톤, private 생성자
+private 생성자를 통해 싱글톤 객체를 사용할 수 있다. 
+```typescript
+class Powersocket {
+  private connectedTo: string;
+  private static instance: Powersocket;
+    private constructor(connectedTo: string) {
+    this.connectedTo = connectedTo;
+  }
+
+  static getInstance() {
+    if (Powersocket.instance) {
+      return this.instance;
+    }
+    this.instance = new Powersocket('');
+    return this.instance;
+  }
+
+  set setConnectedTo(value : string) {
+      this.setConnectedTo = value;
+  }
+}
+
+
+const zdGram15 : LgGram = new LgGram("15ZD90N-VX50K",false,[],false);
+const zdGram16 : LgGram = new LgGram("16ZD90P-GX50K",false,[],false);
+plug : Powersocket = Powersocket.getInstance();
+plug.setConnectedTo = zdGram15.getName();
+plug.setConnectedTo = zdGram16.getName();
+```
+## 5. 인터페이스
+인터페이스를 객체의 구조를 규정하기 위해 사용된다. 인터페이스는 **specification**이며, **약속**으로 이해된다. 
+예를 들어, 변속기 타입에 따라 차를 작동시키는 방식이 달라지지만 모든 자동차는 변속기 타입을 가지니 공통된 액션과 요구사항을 리스트업할 수 있을 것이다.
+아래 코드에서도 `Person` 클래스는 `Greetable` 인터페이스에 정의된 name 변수와 greet 함수를 반드시 가져야 한다. interface는 public이나 private 등의 접근제어자를 가질 수 없으며,
+readonly만 사용할 수 있다.
+```typescript
+interface Greetable {
+  readonly name: string;
+
+  greet(phrase: string): void;
+}
+
+class Person implements Greetable {
+  name: string;
+  age = 30;
+
+  constructor(n: string) {
+    this.name = n;
+  }
+
+  greet(phrase: string) {
+    console.log(phrase + ' ' + this.name);
+  }
+}
+
+let user1: Greetable;
+
+user1 = new Person('Max');
+
+user1.greet('Hi there - I am');
+console.log(user1);
+```
+
+### 인터페이스 vs ?
+> 인터페이스 vs 추상클래스 :  
+> 추상클래스는 구현된 함수와 추상함수를 혼용해 사용할 수 있지만 interface는 구현부를 가질 수 없다.
+
+> 인터페이스 vs 클래스 (상속) :  
+> 클래스는 다중상속을 지원하지 않지만 인터페이스는 다중상속을 지원한다. `ex) Person implements Greetable, Named`
+
+> 인터페이스 vs 사용자정의 타입  :  
+> To Be Continued with another post...
+
+### 인터페이스 함수 타입 대안으로 사용하기
+```typescript
+// type AddFn = (a: number, b: number) => number;
+interface AddFn {
+  (a: number, b: number): number;
+}
+
+let add: AddFn;
+
+add = (n1: number, n2: number) => {
+  return n1 + n2;
+};
+```
+
+### 인터페이스의 유연성
+인터페이스에 정의된 스펙을 선택적으로 구현하도록 유연성을 제공한다. `?` 표기를 이용한 일관적이고 명시적인 유연성이다. 
+상위 인터페이스에서 속성이 선택적으로 선언되었다면, 구현클래스에서도 해당속성을 꼭 보유하거나 구현하지 않아도 문제가 발생하지 않는다. 
+```typescript
+interface Named {
+  readonly name?: string;
+  outputName?: string;
+}
+
+interface Greetable extends Named {
+  greet(phrase: string): void;
+}
+
+class Person implements Greetable {
+  name?: string;
+  age = 30;
+
+  constructor(n?: string) {
+    if (n) {
+      this.name = n;
+    }
+  }
+
+  greet(phrase: string) {
+    if (this.name) {
+      console.log(phrase + ' ' + this.name);
+    } else {
+      console.log('Hi!');
+    }
+  }
+}
+
+```
+타입스크립트의 인터페이스에서는 구현부를 가질 수 없다는 사실에 주목한 상태로, 자바와 비교한다.
+자바에서는 인터페이스의 유연성을 위한 방안으로 default, static, private 메소드를 제공한다. 
+#### default 메소드
+- from java 8
+
+default 키워드를 메소드 시그니처 맨앞에 붙여서 사용한다. default 메소드는 interface에 메소드 구현로직이 존재할 수 있도록 만들어준 메소드이다. default 메소드는 public이므로 interface를 상속받는 자식 클래스들이 해당 메소드를 바로 사용할 수 있으며, overriding을 강요하지 않기 때문에 interface에 구현을 하는 것이 일관성있고 안전하다고 여겨지면 사용한다.
+```java
+interface Interface1 {
+    default void printCurrentTime() {
+        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA)
+                .format(System.currentTimeMillis()));
+    }
+
+}
+```
+주의할 점은, 인터페이스가 다중 상속을 지원하기 때문에 발생하는 Diamond Problem이다. 독립된 두개의 인터페이스가 동일한 이름의 메소드를 가지고, 자식 클래스가 해당 인터페이스 두개 모두 상속 받는 경우를 떠올려보자. 자식 클래스는 두개의 인터페이스 중 어떤 메소드를 호출해야될지 참 애매하다. 이럴 땐, 반드시 자식 클래스에서 overriding을 해줘야 한다. 부모 인터페이스의 메소드를 호출해서 사용할 순 있어도.
+
+#### static 메소드
+- from java 8
+
+static 키워드를 메소드 시그니처 맨 앞에 붙여서 사용한다. default와 마찬가지로 자식 클래스가 개별적인 구현을 할 필요가 없는 경우에 사용한다. 다만 static 메소드는 static이니까 interface에 귀속되는 메소드임을 기억한다.
+```java
+interface Interface1 {
+    default void printCurrentTime() {
+        System.out.println(getCurrentTime());
+    }
+    static String getCurrentTime() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA)
+                .format(System.currentTimeMillis());
+    }
+}
+```
+#### private 메소드
+- from java 9
+
+private 메소드도 default, static 메소드 처럼 cohesion 향상을 위해 쓰인다. 자식 클래스가 private 메소드의 내용을 알 필요도 없고 overriding도 필요하지 않은 경우에 사용한다. 다만 private 메소드는 default, static 메소드와 달리 java 9부터 사용가능함을 기억한다.
+```java
+interface Interface1 {
+    default void printCurrentTime() {
+        System.out.println(getCurrentTime());
+    }
+    private static String getCurrentTime() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA)
+                .format(System.currentTimeMillis());
+    }
+}
+```

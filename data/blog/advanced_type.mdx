@@ -186,8 +186,8 @@ alert( user?.address ); // undefined (user가 존재하지 않는 경우 상정)
 alert( user?.address?.street ); // undefined (user와 address가 존재하지않는 경우 상정)
 ```
 # 7. Null 병합 연산자 *`Nullish Coalescing Operator`*
-옵셔널 체이닝과 마찬가지로 최신 문법이다. 삼항연사자를 이용해 null 또는 undefined인 경우를 처리하면 코드의 길이가 길어진다. null 병합 연산자를 사용해 
-null과 undefined에 대해 보다 심플한 문법으로 처리를 할 수 있다.
+옵셔널 체이닝과 마찬가지로 최신 문법이다. 삼항연사자를 이용해 null 또는 undefined인 경우를 처리하면 코드의 길이가 길어진다. null 병합 연산자인 `??` 사용해 
+**null과 undefined에 대해 보다 심플한 문법으로 처리**를 할 수 있다.
 
 ```javascript
 x = (a !== null && a !== undefined) ? a : b;

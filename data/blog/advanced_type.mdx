@@ -1,0 +1,202 @@
+---
+title: 'Typescript 정리 -Advanced Types'
+thumbSrc: '/static/images/typescript.webp'
+date: '2022-06-19'
+tags: ['typescript']
+draft: false
+summary: '타입스크립트의 고급타입에 대해 정리합니다.'
+images: ['/static/images/typescript.webp']
+---
+
+# 📌 목차
+
+![typescript](/static/images/typescript.webp)
+
+- **1.교차타입**
+- **2.타입가드**
+- **3.구별된유니언**
+- **4.형변환**
+- **5.인덱스타입**
+- **6.선택적체이닝**
+- **7.Null병합연산자**
+
+---
+
+이번에는 타입스크립트에서 지원하는 고급타입에 대해 정리했다. 자바와의 연관성은 비교적 떨어지기 때문에 타입스크립트 자체만 정리하였다. 
+
+# 1. 교차타입 *`Intersection Type`*
+두가지 타입을 `&` 기호와 함께 연결시켜 사용한다. 
+아래 코드 처럼 Admin과 Employee를 교차타입으로 만들어 ElevatedEmployee에 할당하면, ElevatedEmployee는 
+두 타입에 있는 모든 멤버인 name, privileges, startDate를 모두 가지게 된다. `|` 기호와 함께 사용하는 유니언 타입은 **두 타입중 공통 속성의 존재만 보장**활 수 있다.
+
+교차티입은 유니언 타입처럼 type 문법 뿐 아니라, interface와도 혼용해 사용가능하다. 다만 원시타입의 경우 number이면서 string인 값은 존재하지 않아 사용할 수 없다.
+
+```typescript
+type Admin = {
+  name: string;
+  privileges: string[];
+};
+
+type Employee = {
+  name: string;
+  startDate: Date;
+};
+
+// interface ElevatedEmployee extends Employee, Admin {}
+
+type ElevatedEmployee = Admin & Employee;
+
+const e1: ElevatedEmployee = {
+  name: 'Tina',
+  privileges: ['create-server','install-instance'],
+  startDate: new Date()
+};
+
+type Intersect = number & string;
+let num : Intersect = 1; // Type 'number' is not assignable to type 'never'.
+```
+# 2. 타입 가드 *`Type Guard`*
+타입 가드는 **런타임에 타임을 검사하도록 만드는 일종의 방식과 표현식**을 의미한다. 타입스크릡트가 컴파일타임에 타입검사를 해주긴 하지만 유니언 타입을 사용하는 등의 
+경우에는 타입 가드를 통한 처리가 필요하기 때문이다. 
+
+### 1. typeof 사용하기 
+원시타입끼리의 타임가드에 자주 사용하는 방식이다. 
+```typescript
+type Combinable = string | number;
+
+function add(a: Combinable, b: Combinable) {
+  if (typeof a === 'string' || typeof b === 'string') {
+    return a.toString() + b.toString();
+  }
+  return a + b;
+}
+```
+### 2. in 사용하기 
+객체를 다룰때 사용하는 방법이다. 객체의 속성 존재여부를 검사하는 방식으로 가드가 가능하다. 
+```typescript
+type UnknownEmployee = Employee | Admin;
+
+function printEmployeeInformation(emp: UnknownEmployee) {
+  console.log('Name: ' + emp.name);
+  if ('privileges' in emp) {
+    console.log('Privileges: ' + emp.privileges);
+  }
+  if ('startDate' in emp) {
+    console.log('Start Date: ' + emp.startDate);
+  }
+}
+```
+
+### 3. instanceof 사용하기
+`in`과 마찬가지로 객체의 타입을 검사할때 사용하는 방식이다. 1,2번 방식의 문제점은 타입가드시 문자열 비교하기 때문에 오타의 위험성이 있다. 
+`instanceof`는 변수명을 통해 보다 명확한 타입 검사가 가능하다. 
+
+```typescript
+type UnknownEmployee = Employee | Admin;
+
+function printEmployeeInformation2(emp: Employee) {
+  console.log('Name: ' + emp.name);
+  if (emp instanceof Employee) {
+    console.log('Privileges: ' + emp.privileges);
+  }
+}
+```
+
+# 3.구별된 유니언 *`Discriminated Union`*
+구별된 유니언도 타입가드의 방식이다. 객체와 유니언 타입을 사용할때, type을 명시하는 방식으로도 타입 가드가 가능하기 때문이다. 
+위에 언급한 instanceof 방법과 같이 오타의 위험성을 줄이면서도, 타입의 속성에 접근함으로써 명시적인 타입가드가 가능해진다.
+
+```typescript
+interface Bird {
+  type: 'bird';
+  flyingSpeed: number;
+}
+
+interface Horse {
+  type: 'horse';
+  runningSpeed: number;
+}
+
+type Animal = Bird | Horse;
+
+function moveAnimal(animal: Animal) {
+  let speed;
+  switch (animal.type) {
+    case 'bird':
+      speed = animal.flyingSpeed;
+      break;
+    case 'horse':
+      speed = animal.runningSpeed;
+  }
+  console.log('Moving at speed: ' + speed);
+}
+
+moveAnimal({type: 'bird', flyingSpeed: 10});
+```
+# 4. 형변환 `Type Conversion`
+형변환은 타입스크립트가 세세한 타입을 지원하지 못할 때 유요하다. DOM 속성에 접근하는 케이스같이. 타입스크립트에서는 HTML의 요소를 `HTMLInputElement`라는 제너릭 타입으로 일괄적으로 인식하기 때문이다.
+그래서 바닐라 자바스크립트에서 하던 것처럼 `userInputElement.value`의 형태로 값에 접근하려고 시도하면 에러가 발생한다. 제너릭 타입의 속성에 없기 때문이다. 
+
+그러므로 아래 언급된 방법 1, 방법2 중에 하나의 방법으로 처리해주어야 한다. 프로젝트 내에서는 방법을 통일해 사용하는 것이 좋다고 한다.
+
+```typescript
+// 방법1 
+const userInputElement = <HTMLInputElement>document.getElementById('user-input')!;
+userInputElement.value = 'Hi there!';
+
+// 방법2
+const userInputElement = document.getElementById('user-input');
+if (userInputElement) {
+  (userInputElement as HTMLInputElement).value = 'Hi there!';
+}
+```
+# 5. 인덱스 타입 *`Indexable Types`*
+타입스크립트의 인터페이스에 동적으로 속성을 추가할 수 있다. 즉, 보다 유연한 속성 사용이 가능하다. `[your_name : type]: type`의 형태로 사용한다. `your_name`의 우변에는 index 접근시 사용할 타입을, 대괄호 우변에는 원소의 타입을 명시한다.
+해당 라인에 명시된 타입만 동적인 타입에 사용될 수 있음에 유의한다. 물론 원소의 속성에는 유니언 타입도 사용될 수 있다.
+
+```typescript
+interface ErrorContainer { 
+  [prop: string]: string;
+}
+
+const errorBag: ErrorContainer = {
+  email: 'Not a valid email!',
+  username: 'Must start with a capital character!'
+};
+interface TypeNumberString {
+  [def : number] : number | string;
+}
+const arr : TypeNumberString = ['a', 'b', 'c', 'd', 'e', 'f', 1 ,2 ];
+console.log(arr[0]);
+console.log(arr[7]);
+```
+
+# 6. 선택적 체이닝 *`Optional Chaining`*
+선택적 체이닝 연산자는 `?` 키워드와 함께 사용된다. 즉, 접근하고자 하는 속성이 **존재하지 않을 수도 있을 때** 사용한다. 속성의 존재유무를 체크하지 않게 된다. 해당 문법은 typescript 3.7 버전부터 지원하는등 최근에 추가된 자바스크립트 문법임에 유의한다. 
+해당 연산자가 존재하지 않을 때는 && 연산자를 이용해 체크했다. 그러나, 해당 문법은 코드의 길이가 길어진다는 단점이 있다. 
+
+> 선택적 체이닝을 남용하면 안된다. 반드시 존재해야하는 속성에 옵셔널 체이닝을 사용하는 경우 혼란을 일으킬 수 있다. 
+
+```typescript
+// && 연산자 사용
+alert( user && user.address && user.address.street ); // undefined (에러 미발생)
+
+// 선택적 체이닝 사용
+alert( user?.address ); // undefined (user가 존재하지 않는 경우 상정)
+alert( user?.address?.street ); // undefined (user와 address가 존재하지않는 경우 상정)
+```
+# 7. Null 병합 연산자 *`Nullish Coalescing Operator`*
+옵셔널 체이닝과 마찬가지로 최신 문법이다. 삼항연사자를 이용해 null 또는 undefined인 경우를 처리하면 코드의 길이가 길어진다. null 병합 연산자를 사용해 
+null과 undefined에 대해 보다 심플한 문법으로 처리를 할 수 있다.
+
+```javascript
+x = (a !== null && a !== undefined) ? a : b;
+x = a ?? b
+```
+### References
+- https://www.typescriptlang.org/docs/handbook/advanced-types.html
+- https://www.typescriptlang.org/docs/handbook/interfaces.html#indexable-types
+- https://stackoverflow.com/questions/65114590/what-are-indexable-types-in-typescript
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
+- https://ko.javascript.info/optional-chaining
+- https://ko.javascript.info/nullish-coalescing-operator

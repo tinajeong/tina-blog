@@ -1,0 +1,76 @@
+---
+title: 'log4j 제로데이이슈 정리'
+thumbSrc: '/static/images/log4j.jpeg'
+date: '2021-12-18'
+tags: ['CVE','JNDI','Java','log4j','log4j-core']
+draft: false
+summary: 'log4j에서 발생한 제로데이 이슈 관련 키워드를 정리합니다.'
+images: ['/static/images/log4j.jpeg']
+---
+
+# 📌 목차
+
+![java](/static/images/log4j.jpeg)
+
+---
+
+**Keywords : `CVE` , `Zero day` , `JNDI`**
+
+log4j 이슈로 회사가 뒤집어졌다. 우리 프로젝트는 `java.util.log.Logger` 를 사용하고 있어서 별다른 이슈는 없었지만(?) log4j를 사용하던 모든 프로젝트에서 난리가 났다. 자주 들었던 키워드를 정리해본다.
+
+## CVE
+
+CVE는 `Common Vulnerabilities and Exposures`의 약자로 **퍼블릭하게** 알려진 소프트웨어 **보안 결함**을 의미하며, 해당 결함들은 **ID**로 관리된다.
+
+
+## CVE-2021-44228
+
+이 논란의 시작인 CVE ID이다.
+
+log4j에서는 JNDI로 `${value}` 형태의 접근을 지원하는데, 이때 **원격으로** 다른 값을 넣어 참조할 수 있음이 밝혀졌다. 즉, **JNDI lookup** 기능을 통해 **서버의 정보**에 **접근**할 수 있기 때문이다. 이러한 형태의 공격을 `Remote Code Execution`(`RCE`)이라고 한다.
+
+단, 해당 이슈는 **log4j-core**를 사용하는 **로깅 프로젝트**에만 해당한다. 
+
+### 개선사항 
+
+Log4j 2.15.0 버전에서는 JNDI Lookup 기능을 **localhost 에서만** 사용하도록 제한했다.
+
+
+## CVE-2021-45046
+
+아직도 문제가 남아있었다! 
+
+Thread Context Map pattern (a.k.a `MDC`)의 **일반적** 입력 패턴이 **아닌** 패턴 방식으로 입력 데이터를 제어해서 `Denial of Service`(`DoS`) 공격을 시도할 수 있다고 한다.
+
+### 개선사항
+
+Log4j 2.16.0 버전에서는 **JNDI 기능 자체**를 **비활성화**했다.
+
+
+## CVE-2021-45105
+
+아직도 `DoS` 공격의 가능성이 남아있었다.
+MDC에서 **자기참조**를 **무한대**로 넣는 경우를 조절하지 못한다.
+
+### 개선사항
+
+Log4j 2.17.0에서는 **설정 관련 문자열만** 재귀적으로 참조될 수 있으며, 다른 모든 상황에서는 top-level 룩업만 가능하다. 
+
+## 현재 문제가 되는 버전 
+
+- 2.0-beta9~ 2.12.1 
+- 2.13.0 ~ 2.16.0
+
+
+## Zero Day
+
+제로데이 이슈는 취약점 패치가 이루어지지 않은 상황에서 보안공격이 이루어지는 것으로, 담당자가 방어대응에 남은 시간이 **Zero Day** 일 정도로 촉박하다는 의미이다. 이번 log4j 취약점은 제로데이이슈에 해당하며, 긴급하게 개선해야할 결함에 속한다.
+
+
+### 참고
+
+https://logging.apache.org/log4j/2.x/
+https://www.redhat.com/en/topics/security/what-is-cve#:~:text=Security%20Data%20API%3F-,Overview,at%20least%20one%20CVE%20ID.
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44228
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45046
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-45105

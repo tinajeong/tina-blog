@@ -1,0 +1,125 @@
+---
+title: 'JVM과 자바 코드의 실행 방법'
+thumbSrc: '/static/images/java.png'
+date: '2021-12-18'
+tags: ['Java','Jvm','jdk','bytecode']
+draft: false
+summary: 'JVM을 중심으로 코드가 어떻게 실행되는지 정리합니다'
+images: ['/static/images/java.png']
+---
+
+# 📌 목차
+
+![java](/static/images/java.png)
+
+---
+
+# JVM은 무엇이며 자바 코드는 어떻게 실행하는가?
+자바 코드는 텍스트 형태로 작성된다. `.java`가 확장자이다. 이 `.java` 파일을 `javac` 명령어를 통해 자바 컴파일러가 `.class` 파일로 변환해준다. 
+`.class` 파일은 특정 CPU에 종속되는 형태가 아니고, Bytecode라는 소스코드와 기계어 중간 쯤의 형태***intermediate representation***로 기술되어 있다. 
+ 
+Bytecode는 JVM 즉, **Java Virtual Machine** ***자바가상머신***이 입력으로 받아 사용한다. JVM은 Bytecode를 **OS 환경에 맞게** 인스턴스화 하여 프로그램을 실행하는 역할을 맡는다. 
+
+![코드실행과정](https://images.velog.io/images/maigumi/post/4093d645-d6f0-400f-be51-7242b7c3ccab/image.png)
+_이미지 출처 : https://docs.oracle.com/javase/tutorial/getStarted/intro/definition.html_
+
+### 컴파일 방법(커멘드창에서)
+여기 `.java`가 확장자인 텍스트 파일이 있다.
+```java
+public class HelloWorld {
+
+        public static void main (String[] args) {
+                System.out.println("Hello World!");
+        }
+}
+```
+
+해당 파일을 `javac` 명령어를 통해 컴파일 할 수 있다. 컴파일을 하면 `HelloWorld.class` 파일이 생성된다. 엄밀히 말하면 `javac` 명령어는 front-end적인 컴파일만 한다. 기계어가 아닌 바이트코드를 생성해내기 때문이다. 그래서 자바의 맥락에서 컴파일을 의미할 때는 단순한 파싱이 아닌 기계어를 생성하는 `JIT Compiler`를 먼저 떠올려야 한다.  
+
+```
+$ javac HelloWorld.java
+$ ls
+HelloWorld.class  HelloWorld.java
+```
+class 파일은 대강 아래와 같은 내용이었다. `javap` 명령어를 사용하면 class 파일의 내용을 human readable한 형태로 보여준다.
+```
+$ javap -c HelloWorld.class
+Compiled from "HelloWorld.java"
+public class HelloWorld {
+  public HelloWorld();
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: return
+
+  public static void main(java.lang.String[]);
+    Code:
+       0: getstatic     #7                  // Field java/lang/System.out:Ljava/io/PrintStream;
+       3: ldc           #13                 // String Hello World!
+       5: invokevirtual #15                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+       8: return
+}
+
+```
+### 실행 방법
+`.class`파일이 생성됐다면 `java` 명령어를 통해 JVM 보고 일을 시켜서 프로그램을 실행할 수 있다. 
+```
+$ java HelloWorld
+Hello World!
+```
+
+## JVM
+
+### Write once, Run anywhere : Portablity
+앞서 언급했듯이, 바이트코드와 자바가상머신은 한 프로그램만 짜서 다양한 환경에서 돌아갈 수 있는 이식성**Portability** 을 실현하는 역할을 한다. 똑같은 상황과 맥락은 아니지만, 프로젝트 하나 짜서 안드로이드와 iOS 환경 모두에서 돌아가는 어플을 만들 수 있도록 서포트해주는 기술_Flutter_을 연상하면 이해가 쉬울 것 같다.
+
+![JVM의 역할](https://images.velog.io/images/maigumi/post/f42f2e30-647b-4fd8-a1a6-3f9862fc59f9/image.png)
+_이미지 출처 : https://docs.oracle.com/javase/tutorial/getStarted/intro/definition.html_
+
+### Just-in-Time Compiler : Runtime Optimization
+프로그램이 돌아가는 동안, 자바 가상 머신에 포함된 JIT Compiler는 바이트코드를 기계어로 번역해 사용할 뿐 아니라, 런타임에 발생하는 것들을 모니터링하고 실행과정을 최적화해서 성능을 향상 시킨다. 즉, 반복적으로 사용되는 기계어가 있다면 JIT Compiler가 캐싱해둔다. 이후 재컴파일하고 해당 기계어가 재호출 되면, 기계어로 다시 interpret하는 과정없이 바로 실행해 사용한다. 결과적으로 JIT Compiler는 캐싱 등의 전략을 통해 runtime optimization을 성취함으로써, 일반적인 interpreter와의 성능적 차별성을 확보할 수 있다. 고로 자바를 처음 배울 때 자주 언급되는 *자바 성능 이슈*는  Critical하게 고려되어야 할 정도는 아니며, 상용적으로 쓰이기에 부족함이 없다.
+
+## JVM의 구성 요소
+JVM은 3개의 서브시스템으로 이루어진다.
+### Class Loader
+Class Loader는 자바에서의 `동적 클래스 로딩`을 담당한다. Class Loader는 특정 클래스 A가 처음 참조될 때(compile 타임이 아닌 runtime에) 클래스 A를 load하고, link하고, initialize한다.  
+
+- ***load*** : BootStrap, Extension, Application 3개의 로더가 특정 path에 포함된 클래스들을 구분하고 분업해 로딩을 해준다.
+- ***link*** : Bytecode verifier가 생성된  Bytecode를 검증한다(`Verify`). static 변수 메모리가 할당되고, default value들로 채워진다(`Prepare`). logical reference들이 method 영역의 original reference로 대체된다(`Resolve`).
+- ***initialize*** : static변수들에 사용자가 할당한 original value가 대입되고, static block이 실행된다. 
+
+
+> 📌 _고로 static variable도 runtime 중 class loading time에 메모리 할당 된다.  
+> C는 compile time에 할당된다._
+
+
+### Runtime Data Area
+Runtime Data Area는 5개 요소로 구별된다. 
+
+- ***Method Area*** : JVM에서 method area는 하나만 존재하고, 그렇기 때문에 method area의 자원들은 공유자원이며 thread-safe하지 않다. method area에는 static variable을 비롯한 클래스 레벨의 모든 데이터들이 저장된다.
+- ***Heap Area*** : JVM에서 heap area도 하나만 존재하는 공유자원이고, thread-safe하지 않다. heap area에는 array, object 등의 인스턴스들이 저장된다. 
+- ***Stack Area*** : 스레드 별로 하나의 runtime stack이 생성되므로 thread-safe하다. 메소드 호출이 발생할 때 마다 stack 내부적으로 지역변수, 실행할 연산, exception catch 정보, 메소드 관련 정보들이 저장되는 `Stack Frame`이 생성된다. 
+- ***PC Registers*** : 스레드 별로 PC Register들이 생성되고, PC Register에서는 현재 작업의 주소가 저장되고, 다음 명령으로 넘어가면 다음 작업의 주소로 업데이트 된다.
+- ***Native Method stacks***: 스레드 별로 Native Method stack이 생성된다. `Native method`는 Java에서 다른 언어의 라이브러리를 호출해서 사용하거나, 이미 존재하는  C/C++ 프로젝트를 Java로 통합할 때 사용한다.
+
+
+
+### Execution Engine
+Execution Engine은 bytecode의 내용이 올라간 Runtime Data Area의 데이터를 가지고 프로그램을 실행한다. Execution Engine에는 bytecode를 one by one 기계어로 번역하는 Intepreter와, Interpreter의 단점을 극복한 JIT Compiler, 사용자의 메모리 관리 없이도 사용되지 않은 자원을 자동 할당 해제하는 Garbage Collector로 이루어져있다.
+## JDK vs JRE
+
+JRE는 Java Runtime Environment의 약자로, 자바 프로그램을 실행시키는 데 필요한 라이브러리, `java` 명령어, JVM 등을 의미한다. 환경적인 요소이기 때문에 JRE만 가지곤 새로운 프로그램을 개발할 순 없다.
+
+JDK는 Java Development Kit의 약자로, JRE 뿐 아니라 새로운 프로그램을 개발하기 위한 라이브러리, `javac` 명렁어 등을 포함한다. 자바 프로그래머는 JDK를 받아 사용한다. Java 9버전부터는 JRE가 따로 만들어지지 않고, JDK에 패키징되어 출시되는 중이다. 
+
+
+
+### **Reference**
+
+- https://docs.oracle.com/javase/tutorial/getStarted/intro/definition.html
+- https://www.oracle.com/java/technologies/architecture-neutral-portable-robust.html#319
+- https://stackoverflow.com/questions/1906445/what-is-the-difference-between-jdk-and-jre
+- https://dzone.com/articles/jvm-architecture-explained
+- https://en.wikipedia.org/wiki/Just-in-time_compilation
+- https://www.baeldung.com/java-native
+- Java in a Nutshell, 7th Edition

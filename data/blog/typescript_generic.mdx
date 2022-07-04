@@ -115,7 +115,7 @@ function extractAndConvert<T extends object, U extends keyof T>(
 
 extractAndConvert({ name: 'Tina' , gender : 'Female'}, 'name');
 ```
-keyof 는 부모타입의 키를 모아 유니언 타입으로 만들어주는 키워드이다. 위 코드의 `U`는 `keyof T`를 상속 받으므로, 두번째 파라미터값이 `'name'` 또는 `'gender'`이면 에러가 발생하지 않는다.
+keyof 는 source가 되는 타입의 키를 모아 유니언 타입으로 만들어주는 키워드이다. 위 코드의 `U`는 `keyof T`를 상속 받으므로, 두번째 파라미터값이 `'name'` 또는 `'gender'`이면 에러가 발생하지 않는다.
 keyof는 없는 키값에 접근하는 경우를 방지 할 수 있기 때문에 유용하다.
 
 # Generic class 

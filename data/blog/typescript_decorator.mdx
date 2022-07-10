@@ -1,0 +1,399 @@
+---
+title: 'Typescript - 데코레이터'
+thumbSrc: '/static/images/typescript.webp'
+date: '2022-07-10'
+tags: ['typescript','decorator','design pattern']
+draft: false
+summary: '타입스크립트에서의 데코레이터 용법을 정리합니다.'
+images: ['/static/images/typescript.webp']
+---
+
+# 📌 목차
+
+![typescript](/static/images/typescript.webp)
+
+---
+
+
+## 타입스크립트에서 데코레이터란?
+코드를 통해 코드를 작성해주는 메타프로그래밍의 용례이며,  
+데코레이터는 어노테이션 형태로 기능을 추가할 수 있는 특별한 종류의 선언이다. 
+데코레이터는 보통 클래스 단위로 사용되며, 메소드, 접근자, 프로퍼티 등에도 사용된다.
+
+## 데코레이터 사용 설정하기
+데코레이터는 **ECMAScript**에 새로 추가된 실험적인 특징이기 때문에, typescript에서는 `tsconfig.json` 파일에서 `experimentalDecorators`옵션을 true로 바꿔준다.
+```json
+...
+"experimentalDecorators" : true,
+...
+```
+
+## 데코레이터 정의하기
+데코레이터는 아래 `Logger` 처럼 보통 **대문자**로 네이밍한다. 
+```javascript
+function Logger(contructor : Function) {
+    console.log("Logging...");
+    console.log(contructor);
+}
+
+@Logger
+class Person {
+    name = "Tina";
+
+    constructor() {
+          console.log("Creating Person Object...");
+    }
+ }
+
+const person = new Person();
+```
+
+### 실행결과
+```
+> "Logging..." 
+> class Person {
+    constructor() {
+        this.name = "Tina";
+        console.log("Creating Person Object...");
+    }
+} 
+> "Creating Person Object..." 
+```
+데코레이터를 적용하면 인스턴스화***instanciation***가 이루어지지 않았을 때도, 
+**런타임에** 데코레이터가 적용된 클래스가 정의된 지점에 실행된다. 
+
+
+## 데코레이터 팩토리
+데코레이터 팩토리를 사용하면, 파라미터값을 전달할 수 있다는 유연성이 생긴다. 팩토리함수를 하고 하기 위해서는, 
+위 코드에서 파라미터값을 전달하고자 하는 `logString`으로 변경하고, 함수를 반환하도록 변경한다.
+```typescript
+function Logger(logString: string) { // 데코레이터 팩토리함수
+  return function(constructor: Function) { // 데코레이터 함수
+    console.log(logString);
+    console.log(constructor);
+  };
+}
+
+@Logger('LOGGING - PERSON')
+class Person {
+  name = 'Tina';
+
+  constructor() {
+    console.log('Creating Person object...');
+  }
+}
+
+const pers = new Person();
+```
+
+
+### 실행결과
+
+```shell
+>"LOGGING - PERSON" 
+> class Person {
+    constructor() {
+        this.name = 'Tina';
+        console.log('Creating Person object...');
+    }
+} 
+>"Creating Person 
+```
+
+### DOM 렌더링에 데코레이터 팩토리 사용하기
+```typescript
+function WithTemplate(template: string, hookId: string) {
+  return function(constructor: any) {
+    const hookEl = document.getElementById(hookId);
+    const p = new constructor();
+    if (hookEl) {
+      hookEl.innerHTML = template;
+      hookEl.querySelector('h1')!.textContent = p.name;
+    }
+  }
+}
+
+@WithTemplate('<h1>My Person Object</h1>', 'app')
+class Person {
+  name = 'Tina';
+
+  constructor() {
+    console.log('Creating person object...');
+  }
+}
+
+const pers = new Person();
+console.log(pers);
+```
+`WithTemplate`라는 데코레이터의 첫번째 파라미터에 렌더링할 template을 넣고, 두번째 파라미터에는 접근할 요소를 지정해 사용자의 이름을 화면에 렌더링할 수 있도록 
+코드를 작성하였다. 앵귤러의 렌더링 방식도 이와 유사한 아이디어를 가진다. 
+
+## 데코레이터의 실행순서
+여러개의 데코레이터를 사용할 수 있는데, 선언순서와 실행순서가 반대라는 점에 유의한다. 
+
+```typescript
+function Logger(logString: string) {
+  console.log('LOGGER FACTORY');
+  return function(constructor: Function) {
+    console.log(logString);
+    console.log(constructor);
+  };
+}
+
+function WithTemplate(template: string, hookId: string) {
+  console.log('TEMPLATE FACTORY');
+  return function(constructor: any) {
+    console.log('Rendering template');
+    const hookEl = document.getElementById(hookId);
+    const p = new constructor();
+    if (hookEl) {
+    hookEl.innerHTML = template;
+      hookEl.querySelector('h1')!.textContent = p.name;
+    }
+  }
+}
+
+@Logger('LOGGING')
+@WithTemplate('<h1>My Person Object</h1>', 'app')
+class Person {
+  name = 'Tina';
+
+  constructor() {
+    console.log('Creating person object...');
+  }
+}
+```
+
+### 실행결과
+```
+>"LOGGER FACTORY" 
+>"TEMPLATE FACTORY" 
+>"Rendering template" 
+>"Creating person object..." 
+>"LOGGING" 
+>class Person {
+    constructor() {
+        this.name = 'Tina';
+        console.log('Creating person object...');
+    }
+```
+선언된 순서대로 Logger 팩토리 메세지가 출력되고, Template 메세지가 출력되지만, 
+실제 데코레이터 메소드는 Template 에서 Rendering 아래에서부터 실행된다는 것에 유의한다. 
+
+
+## 속성 데코레이터
+서두에 언급했듯이, 속성, 메소드, 접근제어자, 파라미터에 데코레이터를 적용할 수 있다.
+```typescript
+function Log(target: any, propertyName: string | Symbol) {
+  console.log('Property decorator!');
+  console.log(target, propertyName);
+}
+
+class Product {
+  @Log
+  title: string;
+  private _price: number;
+
+  set price(val: number) {
+    if (val > 0) {
+      this._price = val;
+    } else {
+      throw new Error('Invalid price - should be positive!');
+    }
+  }
+
+  constructor(t: string, p: number) {
+    this.title = t;
+    this._price = p;
+  }
+
+  getPriceWithTax(tax: number) {
+    return this._price * (1 + tax);
+  }
+}
+```
+
+### 실행결과 
+```
+> "Property decorator!" 
+```
+마찬가지로, 인스턴스화***instanciation**없이도 선언과 함께 데코레이터가 실행되는 것을 볼 수 있다.
+
+## 매개변수 데코레이터
+```typescript
+function Log4(target: any, name: string | Symbol, position: number) {
+  console.log('Parameter decorator!');
+  console.log(target);
+  console.log(name);
+  console.log(position);
+}
+class Product {
+  ...
+  getPriceWithTax(@Log4 tax: number) {
+    return this._price * (1 + tax);
+  }
+}
+```
+
+### 실행결과
+```
+> "Parameter decorator!" 
+> Product: {} 
+> "getPriceWithTax" 
+> 0 
+```
+## 클래스 데코레이터에서 클래스 반환하고 변경하기
+데코레이터는 기본적으로 클래스에 종속된다. 인스턴스화***instanciation***되었을때 데코레이터도 생성되는 것이 아니라, 
+클래스가 선언된 시점에, 메소드가 선언된 시점에, 접근제어자가 선언된 시점에 적용된 데코레이터도 함께 설정된다. 
+
+이 데코레이터를 이용해, constructor함수를 커스텀할 수 있다. 제네릭을 이용해 앞서 Person에서 사용되었던 
+생성자로직을 대체하고, 커스텀해 사용할 수 있다.
+
+```typescript
+function WithTemplate(template: string, hookId: string) {
+  return function<T extends { new (...args: any[]): {name: string} }>(
+    originalConstructor: T
+  ) {
+    return class extends originalConstructor {
+      constructor(..._: any[]) {
+        super();
+        console.log('Rendering Template');
+        const hookEl = document.getElementById(hookId);
+        if (hookEl) {
+          hookEl.innerHTML = template;
+          hookEl.querySelector('h1')!.textContent = this.name;
+        }
+      }
+    };
+  };
+}
+```
+
+> 객체에 `name` 속성이 존재한다는 조건을 설정하기 위해 제너릭의 객체 선언시 `{name: string}`을 명시해주었다.
+
+### `Authbind` 데코레이터
+다른 객체의 컨텍스트에서 다른 클래스의 기능을 사용하고자 할때 참조하는 객체가 상이해 `undefined`가 출력되는 이슈가 있다.
+`Authbind` 데코레이터를 사용할 수 있다.
+button의 이벤트리스너함수에 `p.showMessage`를 추가하면 `undefined`가 출력되므로, `Authbind`를 함수 데코레이터로 설정해
+이벤트가 발생했을때 참조하는 객체인 `this`를 바인드시켜 사용한다. 
+
+```typescript
+function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
+  const originalMethod = descriptor.value;
+  const adjDescriptor: PropertyDescriptor = {
+    configurable: true,
+    enumerable: false,
+    get() {
+      const boundFn = originalMethod.bind(this);
+      return boundFn;
+    }
+  };
+  return adjDescriptor;
+}
+
+class Printer {
+  message = 'This works!';
+
+  @Autobind
+  showMessage() {
+    console.log(this.message);
+  }
+}
+
+const p = new Printer();
+p.showMessage();
+
+const button = document.querySelector('button')!;
+button.addEventListener('click', p.showMessage);
+```
+
+## 데코레이터로 유효성 검증***validation***하기
+데코레이터를 통해 클라이언트 입장에서 아주 **멋.있.고**, 깔끔한 방식으로 데이터 유효성검사를 할 수 있다.
+유효성 검증을 위한 속성이름을 담기 위한 그릇으로 `ValidatorConfig` 타입을 정의하고, `registeredValidators`를 선언한다.
+원래 `registeredValidators`를 담기위해 `...registeredValidators[target.constructor.name],`코드도 추가하였다.
+`validate` 함수에서는 속성이름에 따라 실질적인 유효성 검증 로직을 구현한다.
+```typescript
+interface ValidatorConfig {
+  [property: string]: {
+    [validatableProp: string]: string[]; // ['required', 'positive']
+  };
+}
+
+const registeredValidators: ValidatorConfig = {};
+
+function Required(target: any, propName: string) {
+  registeredValidators[target.constructor.name] = {
+    ...registeredValidators[target.constructor.name],
+    [...(registeredValidators[target.constructor.name]?.[propName] ?? []), 'required']
+  };
+}
+
+function PositiveNumber(target: any, propName: string) {
+  registeredValidators[target.constructor.name] = {
+    ...registeredValidators[target.constructor.name],
+    [propName]: [...(registeredValidators[target.constructor.name]?.[propName] ?? []), 'positive']
+  };
+}
+
+function validate(obj: any) {
+  const objValidatorConfig = registeredValidators[obj.constructor.name];
+  if (!objValidatorConfig) {
+    return true;
+  }
+  let isValid = true;
+  for (const prop in objValidatorConfig) {
+    for (const validator of objValidatorConfig[prop]) {
+      switch (validator) {
+        case 'required':
+          isValid = isValid && !!obj[prop];
+          break;
+        case 'positive':
+          isValid = isValid && obj[prop] > 0;
+          break;
+      }
+    }
+  }
+  return isValid;
+}
+```
+
+위와 같이 검증 로직을 추가해두면, 검증로직을 사용하는 쪽에서는 아주 간단하게 유효성을 검증할 수 있다.
+클래스에 속성 데코레이터를 명시하고, `validate(createdCourse)` 함수를 호출하면 필수값과 숫자의 양수여부를 검사할 수 있다.
+
+```typescript
+class Course {
+  @Required
+  title: string;
+  @PositiveNumber
+  price: number;
+
+  constructor(t: string, p: number) {
+    this.title = t;
+    this.price = p;
+  }
+}
+
+const courseForm = document.querySelector('form')!;
+courseForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const titleEl = document.getElementById('title') as HTMLInputElement;
+  const priceEl = document.getElementById('price') as HTMLInputElement;
+
+  const title = titleEl.value;
+  const price = +priceEl.value;
+
+  const createdCourse = new Course(title, price);
+
+  if (!validate(createdCourse)) {
+    alert('Invalid input, please try again!');
+    return;
+  }
+  console.log(createdCourse);
+});
+```
+## References
+- https://typescript-kr.github.io/pages/decorators.html
+- https://typescript-kr.github.io/pages/decorators.html#메서드-데코레이터-method-decorators
+- https://yamoo9.gitbook.io/typescript/decorator/factory
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
+- https://www.udemy.com/course/understanding-typescript/#questions/8835948

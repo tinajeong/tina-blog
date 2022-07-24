@@ -191,7 +191,333 @@ class ProjectState {
 const projectState = ProjectState.getInstance();
 
 ```
+
+## 상속과 제네릭 적용하기 
+`ProjectList` 클래스와 `ProjectInput` 클래스의 공통점을 추출해 추상클래스인 Component를 만든다. 
+```typescript
+abstract class Component<T extends HTMLElement, U extends HTMLElement> {
+  templateElement: HTMLTemplateElement;
+  hostElement: T;
+  element: U;
+
+  constructor(
+    templateId: string,
+    hostElementId: string,
+    insertAtStart: boolean,
+    newElementId?: string
+  ) {
+    this.templateElement = document.getElementById(
+      templateId
+    )! as HTMLTemplateElement;
+    this.hostElement = document.getElementById(hostElementId)! as T;
+
+    const importedNode = document.importNode(
+      this.templateElement.content,
+      true
+    );
+    this.element = importedNode.firstElementChild as U;
+    if (newElementId) {
+      this.element.id = newElementId;
+    }
+
+    this.attach(insertAtStart);
+  }
+
+  private attach(insertAtBeginning: boolean) {
+    this.hostElement.insertAdjacentElement(
+      insertAtBeginning ? 'afterbegin' : 'beforeend',
+      this.element
+    );
+  }
+
+  abstract configure(): void;
+  abstract renderContent(): void;
+}
+```
+
+> 자식 클래스에서 `configure()` 메소드와 `renderContent()` 메소드를 호출하는 것이 더 안전하다. 
+> 각 클래스에서 사용하는 `HTMLElement`의 종류는 달라지기 때문이다.
+
+### 자식클래스에 적용하기 
+- 공통부 처리 : 생성자에서 super를 호출하고, 필요한 id와 옵션을 넘겨준다. 
+- 커스텀 처리 : `configure()`와 `renderContent()`는 개별구현하고, 각 클래스에서만 쓰이는 `assignedProjects`등의 변수는 따로 유지.
+```typescript
+class ProjectList extends Component<HTMLDivElement, HTMLElement> {
+  assignedProjects: Project[];
+
+  constructor(private type: 'active' | 'finished') {
+    super('project-list', 'app', false, `${type}-projects`);
+    this.assignedProjects = [];
+
+    this.configure();
+    this.renderContent();
+  }
+
+  configure() {
+    projectState.addListener((projects: Project[]) => {
+      const relevantProjects = projects.filter(prj => {
+        if (this.type === 'active') {
+          return prj.status === ProjectStatus.Active;
+        }
+        return prj.status === ProjectStatus.Finished;
+      });
+      this.assignedProjects = relevantProjects;
+      this.renderProjects();
+    });
+  }
+
+  renderContent() {
+    const listId = `${this.type}-projects-list`;
+    this.element.querySelector('ul')!.id = listId;
+    this.element.querySelector('h2')!.textContent =
+      this.type.toUpperCase() + ' PROJECTS';
+  }
+
+  private renderProjects() {
+    const listEl = document.getElementById(
+      `${this.type}-projects-list`
+    )! as HTMLUListElement;
+    listEl.innerHTML = '';
+    for (const prjItem of this.assignedProjects) {
+      const listItem = document.createElement('li');
+      listItem.textContent = prjItem.title;
+      listEl.appendChild(listItem);
+    }
+  }
+}
+
+class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
+  titleInputElement: HTMLInputElement;
+  descriptionInputElement: HTMLInputElement;
+  peopleInputElement: HTMLInputElement;
+
+  constructor() {
+    super('project-input', 'app', true, 'user-input');
+    this.titleInputElement = this.element.querySelector(
+      '#title'
+    ) as HTMLInputElement;
+    this.descriptionInputElement = this.element.querySelector(
+      '#description'
+    ) as HTMLInputElement;
+    this.peopleInputElement = this.element.querySelector(
+      '#people'
+    ) as HTMLInputElement;
+    this.configure();
+  }
+
+  configure() {
+    this.element.addEventListener('submit', this.submitHandler);
+  }
+
+  renderContent() {}
+
+  private gatherUserInput(): [string, string, number] | void {
+    const enteredTitle = this.titleInputElement.value;
+    const enteredDescription = this.descriptionInputElement.value;
+    const enteredPeople = this.peopleInputElement.value;
+
+    const titleValidatable: Validatable = {
+      value: enteredTitle,
+      required: true
+    };
+    const descriptionValidatable: Validatable = {
+      value: enteredDescription,
+      required: true,
+      minLength: 5
+    };
+    const peopleValidatable: Validatable = {
+      value: +enteredPeople,
+      required: true,
+      min: 1,
+      max: 5
+    };
+
+    if (
+      !validate(titleValidatable) ||
+      !validate(descriptionValidatable) ||
+      !validate(peopleValidatable)
+    ) {
+      alert('Invalid input, please try again!!');
+      return;
+    } else {
+      return [enteredTitle, enteredDescription, +enteredPeople];
+    }
+  }
+
+  private clearInputs() {
+    this.titleInputElement.value = '';
+    this.descriptionInputElement.value = '';
+    this.peopleInputElement.value = '';
+  }
+
+  @autobind
+  private submitHandler(event: Event) {
+    event.preventDefault();
+    const userInput = this.gatherUserInput();
+    if (Array.isArray(userInput)) {
+      const [title, desc, people] = userInput;
+      projectState.addProject(title, desc, people);
+      this.clearInputs();
+    }
+  }
+}
+```
+### ProjectState의 부모클래스 만들기 
+- ProjectState 클래스는 상태를 의미하므로 상태에 사용될 수 있는 `State`를 끄집어낸다.
+```typescript
+type Listener<T> = (items: T[]) => void;
+
+class State<T> {
+  protected listeners: Listener<T>[] = [];
+
+  addListener(listenerFn: Listener<T>) {
+    this.listeners.push(listenerFn);
+  }
+}
+
+class ProjectState extends State<Project> {
+  private projects: Project[] = [];
+  private static instance: ProjectState;
+
+  private constructor() {
+    super();
+  }
+
+  static getInstance() {
+    if (this.instance) {
+      return this.instance;
+    }
+    this.instance = new ProjectState();
+    return this.instance;
+  }
+
+}
+```
+
+## 목록 렌더링 작업 분리하기
+- `ProjectItem`도 화면에 렌더링되는 `Component`의 일종이므로 상속받아 사용한다.
+```typescript
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+  private project: Project;
+
+  constructor(hostId: string, project: Project) {
+    super('single-project', hostId, false, project.id);
+    this.project = project;
+
+    this.configure();
+    this.renderContent();
+  }
+
+  configure() {}
+
+  renderContent() {
+    this.element.querySelector('h2')!.textContent = this.project.title;
+    this.element.querySelector(
+      'h3'
+    )!.textContent = this.project.people.toString();
+    this.element.querySelector('p')!.textContent = this.project.description;
+  }
+}
+...
+private renderProjects() {
+  const listEl = document.getElementById(
+    `${this.type}-projects-list`
+  )! as HTMLUListElement;
+  listEl.innerHTML = '';
+  for (const prjItem of this.assignedProjects) {
+    new ProjectItem(this.element.querySelector('ul')!.id, prjItem);
+  }
+}
+```
+
+## 게터로 조건부 반환 처리하기
+```typescript
+get persons() {
+  if (this.project.people === 1) {
+    return '1 person';
+  } else {
+    return `${this.project.people} people`;
+  }
+}
+```
+## 그래그 & 드롭 처리하기 
+- UI 업데이트 처리와 상태 업데이트 처리하기
+## 자바스크립트의 드래그 이벤트 종류
+- dragstart : 드래깅이 시작될때
+- dragend : 드래깅이 끝날때
+- dragover : 드래깅중인 요소가 드래그 가능한 영역 안으로 들어오고 drop하기 전까지 ms 단위로 계속 발생
+- dragenter : 드래깅중인 요소가 드래그 가능한 영역 안으로 들어오고 드래깅이 멈출 때 
+- dragleave : 드래깅중인 요소가 영역 밖으로 나갈때
+- drop : 드래깅 중이었던 요소에서 마우스를 뗄때
+### step 1. 드래깅 이벤트 처리를 위한 인터페이스 선언하기
+```typescript
+interface Draggable {
+  dragStartHandler(event: DragEvent): void;
+  dragEndHandler(event: DragEvent): void;
+}
+
+interface DragTarget {
+  dragOverHandler(event: DragEvent): void;
+  dropHandler(event: DragEvent): void;
+  dragLeaveHandler(event: DragEvent): void;
+}
+
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements Draggable
+...
+class ProjectList extends Component<HTMLDivElement, HTMLElement> implements DragTarget
+```
+
+### step 2. Draggable methods 처리하기 
+```typescript
+class ProjectItem implements Draggable {
+  @autobind
+  dragStartHandler(event: DragEvent) {
+    event.dataTransfer!.setData('text/plain', this.project.id); // 데이터 전송타입 설정하기
+    event.dataTransfer!.effectAllowed = 'move'; // drop 허용하기
+  }
+
+  dragEndHandler(_: DragEvent) {
+    console.log('DragEnd');
+  }
+
+  configure() {
+    this.element.addEventListener('dragstart', this.dragStartHandler);
+    this.element.addEventListener('dragend', this.dragEndHandler);
+  }
+}
+```
+### step 3. DragTarget methods 처리하기 
+```typescript
+class ProjectList implements DragTarget {
+  @autobind
+  dragOverHandler(event: DragEvent) {
+    if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') { // 드래깅처리 필터링하기
+      event.preventDefault();
+      const listEl = this.element.querySelector('ul')!;
+      listEl.classList.add('droppable');
+    }
+  }
+
+  @autobind
+  dropHandler(event: DragEvent) {
+    const prjId = event.dataTransfer!.getData('text/plain');
+    projectState.moveProject(
+      prjId,
+      this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished
+    );
+  }
+
+  @autobind
+  dragLeaveHandler(_: DragEvent) {
+    const listEl = this.element.querySelector('ul')!;
+    listEl.classList.remove('droppable');
+  }
+
+}
+```
 ## References
 - https://typescript-kr.github.io/pages/tutorials/dom-manipulation.html
 - https://developer.mozilla.org/ko/docs/Web/API/HTMLElement
 - https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
+- https://developer.mozilla.org/ko/docs/Web/API/Document/drag_event
+- https://developer.mozilla.org/en-US/docs/Web/API/Document/dragover_event

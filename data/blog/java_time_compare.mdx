@@ -1,0 +1,53 @@
+---
+title: 'Java currentTimeMillis vs nanoTime'
+thumbSrc: '/static/images/java.png'
+date: '2022-07-28'
+tags: ['java','time','currentTimeMillis','nanoTime']
+draft: false
+summary: '자바의 시간관련 함수와 용례에 대해 비교하며 정리합니다.'
+images: ['/static/images/java.png']
+---
+
+# 📌 목차
+
+![java](/static/images/java.png)
+
+## currentTimeMillis() vs nanoTime()
+
+---
+
+## currentTimeMillis()
+- currentTimeMills는 UNIX Timestamp로 현재 시각을 ms 단위로 리턴하는 함수이다.
+- UNIX Timestamp는 1970년 1월 1일 00시 00분 00초(UTC)를 기점으로 **특정 시간과의 차이를 정수형태로 표시**한다.
+- OS에 따라 측정시간 단위가 다르다. 대부분의 OS는 10ms 단위로 시각을 측정한다.  
+
+```java
+long epoch = System.currentTimeMillis();
+```
+
+### 2038년 1월 19일에 일어날 사건
+- 정수를 32-bit로 저장하는 컴퓨터에서는 2038년 1월 19일에 overflow 에러가 발생한다. 
+- 시간 표기법을 다른 방식으로 바꾸거나, 시스템을 변경해야 한다.
+
+## nanoTime()
+- nanoTime은 현재 작동중인 JVM의 시간을 ns 단위로 리턴하는 함수이다.
+- 현재 작동중인 JVM의 정밀시간 소스의 현재값이다. 전송소요 시간을 측정하기 위해 별도의 JVM에서 nanoTime을 구하는 것은 의미없다.
+- 현재 프로그램의 소요시간을 정밀하게 측정할 때 사용한다.
+
+```java
+long startTime = System.nanoTime();
+...
+long endTime = System.nanoTime();
+long elapsedTime = endTime- startTime;
+```
+### 시간차는 292년까지
+- nanoTime() 함수로 구한 두 시간의 차이가 292년 이상이면 overflow에러가 발생한다.
+
+## Accuracy와 Precision
+시간 정확도***Acccuracy***가 중요할 땐  `currentTimeMillis()` 를, 시간의 정밀도***Precision***가 중요할 땐 `nanoTime()`을 사용한다.
+
+---
+#### reference
+https://docs.oracle.com/javase/8/docs/api/java/lang/System.html#currentTimeMillis
+https://docs.oracle.com/javase/8/docs/api/java/lang/System.html#nanoTime
+https://www.unixtimestamp.com/

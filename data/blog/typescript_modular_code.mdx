@@ -1,0 +1,139 @@
+---
+title: 'Typescript에서 코드 쪼개기'
+thumbSrc: '/static/images/typescript.webp'
+date: '2022-07-25'
+tags: ['typescript','namespace','file bundling','import','exports']
+draft: false
+summary: '코드 뭉텅이를 쪼개어 모듈화해, 보다 쉽게 관리하는 방법을 정리합니다.'
+images: ['/static/images/typescript.webp']
+---
+
+# 📌 목차
+
+![typescript](/static/images/typescript.webp)
+
+---
+
+## Typescript 프로젝트에서 모듈화하기
+```
+방법 1: namespace와 file bundling 활용하기  
+방법 2: ES6의 import와 export 문법 사용하기
+```
+
+## 방법 1. namespace 사용하기
+1. 모듈화하기 원하는 코드를 하나의 `drag.ts`파일에 붙여넣고, 그 코드들을 `namespace {}`로 감싸준다.
+2. 해당 네임 스페이스 밖에서도 사용할 수 있도록 `export` 키워드를 사용한다.
+```typescript
+namespace AppNamespace {    
+    // code snippet ...
+    export interface Draggable {
+    dragStartHandler(event: DragEvent): void;
+    dragEndHandler(event: DragEvent): void;
+    }
+
+    export interface DragTarget {
+    dragOverHandler(event: DragEvent): void;
+    dropHandler(event: DragEvent): void;
+    dragLeaveHandler(event: DragEvent): void;
+    }
+}
+```
+3. 해당 코드를 사용하는 파일에서는 namespace로 `///<reference />`를 사용해 `drag.ts`을 import 해준다.
+    - `슬래시 *3` == `///`는 타입스크립트가 인식하는 특수한 코멘트 구문이다.   
+    - 동일한 네임스페이스 이름인 `AppNamespace`를 사용해야 타입스크립트에서 인식할 수 있음에 유의한다.
+    - path 속성에는 상대경로를 기입한다.
+```bash
+.
+├── app.ts
+└── drag.ts
+```
+`app.ts`
+```typescript
+/// <reference path="drag.ts"/>
+namespace AppNamespace {
+    class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> 
+    implements Draggable {
+    ...
+    }
+    class ProjectList extends Component<HTMLDivElement, HTMLElement> 
+    implements DragTarget { 
+    ...
+    }
+}
+```
+
+여기서 문제가 발생한다.
+
+> reference는 javascript가 모르는 문법이다.  
+> 즉, 컴파일된 js코드에서는 reference를 인식할 수 없어 **오류발생**한다!
+
+### 해결법
+#### step 1. 컴파일된 js코드가 네임스페이스와 연결된 상태의 단일 파일(`bundle.js`)이 되도록 처리한다.
+`tsconfig.json`
+```json
+"module":"amd",
+...
+"outFile": "./dist/bundle.js"
+```
+
+#### step 2. html 코드에서 원래 파일이름이 아닌 `/dist/bundle.js`를 import 하도록 처리한다. 
+
+```html
+<script src="./dist/bundle.js" defer></script>
+```
+
+4. ***1.~3.*** 과정을 반복하면, 적절한 단위로 쪼개진 디렉토리 구조가 만들어진다.
+```shell
+.
+├── app.ts
+├── components
+│   ├── base-component.ts
+│   ├── project-input.ts
+│   ├── project-item.ts
+│   └── project-list.ts
+├── decorators
+│   └── autobind.ts
+├── models
+│   ├── drag-drop.ts
+│   └── project.ts
+├── state
+│   └── project-state.ts
+└── util
+    └── validation.ts
+```
+
+## 방법 2. ES6 가져오기와 내보내기 사용하기
+typescript 뿐 아니라 ES6를 지원하는 모든 브라우저에서 사용할 수 있는 방법이며, 이 방법을 표준으로 채택하는 프로젝트가 많다.
+
+> keyword : `import`와 `export`
+### module ES6로 변경하고 outFile 옵션 없애기
+`namespace`와 함께 사용했던 `amd` 모듈은 명시적 가져오기와 내보내기를 지원하지 않으므로 `tsconfig.json`을 수정한다.
+`tsconfig.json`
+```json
+"module":"es2015",
+...
+//"outFile": "./dist/bundle.js"
+```
+### namespace의 문제점
+namespace의 가장 큰 문제점은 명시적이지 않다는 것이다. 필요한 의존성을 불러오지 않더라도 컴파일 타임의 오류가 발생하지 않기 때문에 런타임에 오류를 잡아내야하는 overhead가 존재한다. 
+프로젝트 규모가 커질 수록 심각한 문제가 발생할 가능성이 높아진다. 
+
+### import 할 때 별칭사용하기
+`as` 키워드를 사용해 원래 정의된 네이밍과 별개로, import하는 파일에서 원하는 별칭을 사용할 수 있다. 
+별칭을 사용하면 같은 파일에 정의된 동일한 이름의 변수 등 네이밍 충돌 문제를 방지할 수 있을 뿐 아니라, 팀 컨벤션을 정의하기에도 유리하다. 
+```typescript
+import { export1 as alias1 } from "module-name";
+import { "string name" as alias } from "module-name";
+```
+### export default  
+export하는 파일에서 `default`를 통해 정의된 네이밍 그대로 사용할 수 있다. 
+```typescript
+export default function defaultExport (){
+...
+}
+```
+```typescript
+import defaultExport from "module-name";
+```
+### 모듈의 코드는 가져오기 호출 횟수와 상관없이 '한번' 실행된다.
+하나의 파일이 여러개의 파일에서 import 되는 상황에서,  최초로 import하는 파일에서만 메모리에 올라간다. 다른 파일에서는 import가 다시 실행되지 않는다. 

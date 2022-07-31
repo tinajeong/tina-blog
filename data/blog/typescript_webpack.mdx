@@ -1,0 +1,169 @@
+---
+title: 'Typescript에서 Webpack 사용하기'
+thumbSrc: '/static/images/typescript.webp'
+date: '2022-07-30'
+tags: ['typescript']
+draft: false
+summary: 'Webpack의 필요성과 사용방법을 정리합니다.'
+images: ['/static/images/typescript.webp']
+---
+
+# 📌 목차
+
+![typescript](/static/images/typescript.webp)
+
+---
+
+## Webpack ?
+webpack은 코드를 묶어주고, 빌드해주는 **Orchestration Tool**이다. ES6의 import와 export만 사용했을땐 파일 수 만큼 HTTP 요청이 발생하는 문제점이 있다.
+프로젝트가 커질 수록 성능이 저하될 것이다. 
+
+webpack을 사용하면 코드를 묶어주고(bundle), 최적화(optimize)해주기 때문에 다운로드할 코드의 용량이 줄어든다. 빌드(build)와 관련된 설정도 가능하다.
+
+> 공식홈페이지 : https://webpack.js.org/
+
+## webpack 사용해보기
+
+### 1. 의존성 설치하기  
+```shell
+$ npm install --save-dev webpack webpack-cli webpack-dev-server typescript ts-loader
+```
+
+`package.json`
+```json
+"devDependencies": {
+    "lite-server": "^2.5.4",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.2",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
+}
+```
+
+> ts-loader는 js로 변환하기 위한 기준으로 `tsconfig.json`의 `target`을 체크한다.
+
+
+### 2. `webpack.config.js` 추가하기
+```javascript
+const path = require('path');
+
+module.exports = {
+  entry: './src/app.ts',
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist') // __dirname 으로 절대경로 명시하기
+  },
+  devtool: 'inline-source-map', // bundle.js 디버깅용. tsconfig.json에서 sourceMap 속성 true로 설정하기
+  module: {
+    rules: [
+      {
+        test: /\.ts$/, // 테스트할 확장자 명시
+        use: 'ts-loader',
+        exclude: /node_modules/
+      }
+    ]
+  },
+  resolve: {
+    extensions: ['.ts', '.js']
+  }
+};
+```
+
+### 3. import할 때 사용했던 `.js` 형태의 확장자 삭제하기
+webpack이 확장자를 검색하기 때문에 `.js` 확장자는 모두 삭제한다. 
+
+### 4. webpack dev server 추가하기
+`start` 명령시 사용할 툴을 명시한다.
+`package.json`
+```json
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server",
+    "build": "webpack"
+  },
+```
+`webpack.config.js`
+```javascript
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+    publicPath : 'dist'
+  }
+```
+
+### 5. webpack 디버그 메세지 사용하기
+`webpack.config.js`
+```javascript
+module.exports ={
+    mode : 'development'
+}
+``` 
+
+### 6. production 워크플로우 설정하기
+1) 의존성 설치하기
+- `dist`폴더에 최신 빌드만 남기기
+```shell
+$ npm install --save-dev clean-webpack-plugin
+```
+2) `webpack.config.prod.js`
+```javascript
+const path = require('path');
+const CleanPlugin = require('clean-webpack-plugin');
+
+module.exports = {
+  mode: 'production',
+  entry: './src/app.ts',
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist')
+  },
+  devtool: 'none',
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        use: 'ts-loader',
+        exclude: /node_modules/
+      }
+    ]
+  },
+  resolve: {
+    extensions: ['.ts', '.js']
+  },
+  plugins: [
+    new CleanPlugin.CleanWebpackPlugin()
+  ]
+};
+```
+
+3) `package.json` 작성하기
+```json
+{
+  "name": "todays-artwork",
+  "version": "1.0.0",
+  "description": "Today's artwork",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server",
+    "build": "webpack --config webpack.config.prod.js"
+  },
+  "keywords": [
+    "typescript",
+    "course"
+  ],
+  "author": "Tina Jeong",
+  "license": "ISC",
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "lite-server": "^2.5.4",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.2",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
+  }
+}
+
+```

@@ -15,7 +15,7 @@ images: ['/static/images/welcome.webp']
 
 카카오지도 등을 이용한 api로 거리를 산출하는 방법도 있었지만 외부 api 없이, 위경도 기준의 거리를 산출하는 스타벅스처럼, mysql의 공간함수를 이용해 위경도 기준의 매장과 내 위치 간 거리를 구해보았습니다.
 
-또한 서비스 로직으로 위경도 계산을 넣지 않은 이유는 db단 처리보다 비효율적이기 때문입니다. db에서는 공간인덱스*spatial index*를 사용할 수 있기 때문입니다.  
+또한 서비스 로직으로 위경도 계산을 넣지 않은 이유는 db단 처리보다 비효율적이기 때문입니다. db에서는 공간인덱스*spatial index*를 사용할 수 있습니다.
 
 ---
 
@@ -87,11 +87,11 @@ ST_PointFromText('POINT(37.58296442 127.003887)', 4326),
 일반적으로 GPS 좌표는 WGS84 좌표계를 사용합니다. World Geodetic System의 약자로 1984년에 만들어진 버전이 여러 분야에서 표준으로 사용됩니다. 구글 맵과 안드로이드 GPS도 해당 좌표계를 사용하고 있습니다.
 
 안드로이드의 `distanceBetween`함수에 대한 설명입니다.
-```
-Computes the approximate distance in meters between two locations, 
-and optionally the initial and final bearings of the shortest path between them. 
-Distance and bearing are defined using the **WGS84** ellipsoid.
-```
+
+> Computes the approximate distance in meters between two locations, 
+> and optionally the initial and final bearings of the shortest path between them. 
+> Distance and bearing are defined using the **WGS84** ellipsoid.
+
 
 mysql에서도 srid 4326인 WGS84 좌표계에 대한 지원을 하는 것을 확인할 수 있습니다.  
 
@@ -151,7 +151,7 @@ ALTER TABLE stores ADD SPATIAL INDEX(position);
 
 #### ST_Distance(point1, point2)  
 
-ST_Distance() 함수는 두 지점 간의 유클리드 거리(Euclidean distance)를 계산합니다. 이 함수는 위도와 경도 정보를 입력받아, 두 지점 사이의 거리를 직선 거리로 계산합니다. 즉, 지구가 구 형태라는 가정 없이 두 점 사이의 직선 거리를 계산합니다.
+`ST_Distance` 함수는 두 지점 간의 유클리드 거리(Euclidean distance)를 계산합니다. 이 함수는 위도와 경도 정보를 입력받아, 두 지점 사이의 거리를 직선 거리로 계산합니다. 즉, 지구가 구 형태라는 가정 없이 두 점 사이의 직선 거리를 계산합니다.
 
 아래는 대륭서초타워와 경복궁 사이의 거리를 계산한 결과입니다.
 ```sql

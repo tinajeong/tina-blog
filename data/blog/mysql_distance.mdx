@@ -182,11 +182,12 @@ select ST_DISTANCE_SPHERE(
 
 > 해당 함수는 srid 4326인 경우만 지원하기 때문에 데이터 저장시에 srid 4326를 명시해주었습니다. 그래서 두번째 인자에서 4326을 명시할 필요가 없습니다.
 
+> distance 인자에는 미터 단위로 거리를 입력해야 합니다. 1km = 1000m
 ```sql
 SELECT * FROM stores 
 WHERE ST_DISTANCE_SPHERE(
     ST_POINTFROMTEXT(:#{#location.toPointText()}, 4326), 
-    ST_SRID(stores.position, 4326)) < :distance
+    stores.position) < :distance
 ```
 
 

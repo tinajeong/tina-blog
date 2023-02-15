@@ -180,7 +180,7 @@ select ST_DISTANCE_SPHERE(
 드디어! 내 위치 기준으로 가까운 스타벅스 매장들을 불러올 수 있습니다.
 앞서 언급했듯이 구면체 상의 두 점 간의 거리를 계산하기 위해서는 `st_distance_sphere()` 함수를 사용하면 됩니다.  
 
-> 해당 함수는 srid 4326인 경우만 지원하기 때문에 데이터 저장시에 srid 4326를 명시해주었습니다.
+> 해당 함수는 srid 4326인 경우만 지원하기 때문에 데이터 저장시에 srid 4326를 명시해주었습니다. 그래서 두번째 인자에서 4326을 명시할 필요가 없습니다.
 
 ```sql
 SELECT * FROM stores 
@@ -196,7 +196,7 @@ WHERE ST_DISTANCE_SPHERE(
 - https://blog.naver.com/tulipjihee/222651161773
 - https://support.google.com/maps/answer/18539?hl=ko&co=GENIE.Platform%3DDesktop
 - https://hoing.io/archives/5457
-- https://developer.android.com/reference/android/location/Location#distanceBetween(double,%20double,%20double,%20double,%20float[])
+- https://developer.android.com/reference/android/location/Location#distanceBetween
 - https://en.wikipedia.org/wiki/World_Geodetic_System
 - https://youngwoon.tistory.com/3
 - https://airtravelinfo.kr/wiki/index.php?title=%EB%8C%80%EA%B6%8C%EA%B1%B0%EB%A6%AC

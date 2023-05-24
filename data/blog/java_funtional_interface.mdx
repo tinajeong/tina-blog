@@ -1,0 +1,126 @@
+---
+title: '자바의 함수형 인터페이스'
+thumbSrc: '/static/images/functional_programming.webp'
+date: '2023-05-24'
+tags: ['java','lambda','functional-programming']
+draft: false
+summary: '자바가 어떤식으로 함수형 패러다임을 적용했는지 알아봅니다.'
+images: ['/static/images/functional_programming.webp']
+---
+
+
+## 자바의 함수형 인터페이스  
+
+
+
+지난 포스팅에서 자바가 함수형 인터페이스를 통해 함수형 패러다임을 지원한다고 언급했다. 이번에는 함수형 인터페이스에 대해 보다 자세히 알아본다. 
+
+---
+
+### 함수형 프로그래밍의 특성
+
+먼저 함수형 프로그래밍의 특성에 대해 나열하고, 해당 특성을 자바에서 어떻게 반영했는지 정리한다. 
+
+
+함수형 프로그래밍의 가장 중요한 특징은 일단 `함수가 순수하다`는 것이다. 순수 함수는 입력을 통해서만 출력을 생성하고, 내부 상태를 변경하지 않는 함수다. 순수 함수는 일관되고 예측 가능한 결과를 제공하며, 버그를 찾고 디버깅하기 쉽다.
+
+함수형 프로그래밍은 다음과 같은 특징이 있다.
+
+- **순수 함수 (Pure Function)**: 순수 함수는 동일 입력에 대해 동일한 출력을 생성하는 함수이다. 즉, 내부 상태를 변경하지 않는 함수다. 이는 프로그램의 동작을 예측 가능하게 만들어 버그를 찾고 디버깅하기 쉽게 한다.
+
+- **람다 함수 (Lambda Function)**: 람다 함수는 이름이 없는 함수를 의미한다. 이를 통해 재사용하지 않는 일회성 함수를 간단하고 빠르게 작성할 수 있다.
+
+- **고차 함수 (Higher-Order Function)**: 고차 함수는 함수를 인자로 받거나, 함수를 반환하는 함수다. 이를 활용하면 코드를 보다 간결하고 재사용성이 높게 작성할 수 있다.
+
+- **모나드 (Monad)**: 모나드는 값을 포장하는데 사용되는 구조다. 이를 통해 값의 흐름을 제어하고, 복잡한 흐름제어를 간결하게 표현할 수 있다.
+
+- **불변성 (Immutability)**: 불변성은 객체가 생성된 후에는 그 상태가 변경되지 않는다는 것을 의미한다. 이를 활용하면 시간에 따른 상태 변화를 걱정하지 않고 안정적인 프로그램을 작성할 수 있다.
+
+
+
+### 객체 지향과 함수형의 충돌  
+
+자바는 처음부터 객체 지향 프로그래밍 언어로 설계되었다. 객체 지향과 함수형 프로그래밍의 패러다임은 상당히 다르기 때문에, 자바에서 함수형 패러다임을 완전히 반영하기는 어렵다.  
+
+
+```java
+public class MyClass {
+    private int value;
+
+    public MyClass(int value) {
+        this.value = value;
+    }
+
+    public void incrementValue() {
+        value++;
+    }
+}
+```
+
+위의 코드에서 `incrementValue` 메소드는 내부 상태인 `value`를 변경하므로 순수 함수가 아니다. 이는 객체지향의 기본적인 동작이 함수형 패러다임과 대치된다는 사실을 알 수 있다. 객체지향은 객체의 값을 메소드(행위)를 통해 변경하는 방식으로 동작하기 때문이다.  
+
+### 함수형 인터페이스
+
+하지만 자바는 이런 함수형 패러다임을 부분적으로 흡수해, 특수한 형태의 인터페이스인 함수형 인터페이스를 도입하였다. 함수형 인터페이스는 정확히 하나의 추상 메소드를 가지는 인터페이스를 말한다. 함수형 인터페이스는 static, default 메소드를 여러 개 가질 수 있지만, 추상 메소드는 오직 하나여야 한다.  
+
+`@FunctionalInterface` 어노테이션을 통해 해당 인터페이스가 함수형 인터페이스인지 컴파일 타임에 검증해준다. 만약 두개 이상의 추상 메소드를 명시하면 다음과 같은 에러 메세지가 발생한다.
+
+>Multiple non-overriding abstract methods found in interface MyFunction
+
+```java
+@FunctionalInterface
+public interface MyFunction {
+    void apply();
+}
+```
+
+위의 코드는 `apply`라는 하나의 추상 메소드를 가진 함수형 인터페이스의 예시다. 그러나 일반적으로 직접 함수형 인터페이스를 정의하는 경우는 별로 없으며, `java.util.function`에서 제공하는 함수형 인터페이스를 사용한다.
+
+### 람다 표현식
+
+람다 표현식은 이름이 없는 함수를 정의하는 간결한 방법으로, 함수형 인터페이스의 인스턴스를 생성할 때 사용된다.  
+
+```java
+MyFunction myFunction = () -> System.out.println("Hello, World!");
+```
+
+위의 코드는 `MyFunction` 함수형 인터페이스의 인스턴스를 람다 표현식을 통해 생성한 예시다.  
+
+람다 표현식은 자바 컴파일러에 의해 익명 클래스의 인스턴스로 변환된다. 즉, 위의 코드는 아래와 같이 변환된다.
+
+```java
+MyFunction myFunction = new MyFunction() {
+    @Override
+    public void apply() {
+        System.out.println("Hello, World!");
+    }
+};
+```
+
+이렇게 자바는 함수형 프로그래밍의 원리를 부분적으로 적용하면서도 객체 지향을 유지하도록 설계되어있다.
+
+
+### `java.util.function`의 대표적인 함수형 인터페이스  
+
+```java
+Predicate<Integer> isEven = number -> number % 2 == 0;
+
+System.out.println(isEven.test(10)); // 출력: true
+System.out.println(isEven.test(15)); // 출력: false
+```
+자바에서 제공하는 함수형 인터페이스는 `java.util.function` 패키지에 정의되어 있다. 자바에서 제공하는 대표적인 함수형 인터페이스는 다음과 같다.
+
+| 인터페이스 | 설명 | 예시 |
+|---|---|---|
+| `Function<T, R>` | 입력을 받아서 결과를 반환 | `Function<String, Integer> length = str -> str.length();` |
+| `Predicate<T>` | 조걱 입력을 받아서 참 또는 거짓을 반환 | `Predicate<Integer> isEven = num -> num % 2 == 0;` |
+| `Consumer<T>` | 입력을 받아서 소비하는 함수 -> 결과를 반환하지 않음 | `Consumer<String> printer = str -> System.out.println(str);` |
+| `Supplier<T>` | 입력 없이 결과를 제공하는 함수 | `Supplier<Double> random = () -> Math.random();` |
+| `UnaryOperator<T>` | 단항 연산자 -> 입력과 결과의 타입이 같음 | `UnaryOperator<Integer> square = num -> num * num;` |
+| `BinaryOperator<T>` | 이항 연산자 -> 함수는 두 개의 입력과 하나의 결과 -> 입력과 결과의 타입이 같음 | `BinaryOperator<Integer> sum = (num1, num2) -> num1 + num2;` |
+
+
+## Ref.
+
+- [Youtube - Lambda in Java](https://youtu.be/tj5sLSFjVj4)
+- [Baeldung - Functional Programming in Java](https://www.baeldung.com/java-functional-programming)

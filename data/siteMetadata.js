@@ -14,7 +14,7 @@ const siteMetadata = {
   linkedin: '',
   locale: 'ko-KR',
   analytics: {
-    googleAnalyticsId: '(옵션)',
+    googleAnalyticsId: 'G-WNLW75Y4B0',
   },
   comment: {
     provider: 'utterances',

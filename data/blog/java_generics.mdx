@@ -1,0 +1,136 @@
+---
+title: '자바의 제네릭스(Generic)'
+thumbSrc: '/static/images/generics.png'
+date: '2023-05-31'
+tags: ['java']
+draft: false
+summary: '자바의 제네릭과 사용하는 이유에 대해 알아봅니다.'
+images: ['/static/images/generics.png']
+---
+
+
+## 자바의 제네릭스(Generic)
+
+컴파일 타임에 타입을 체크해주는 기능이다. 제네릭을 통해 추상화 레이어를 추가하는 방식으로 타입과 관련된 에러를 컴파일 타임에 잡아낼 수 있다.
+JDK 1.5 버전부터 지원되었다.
+
+---
+
+## 제네릭이 필요한 이유 
+
+Java 1.5 이전에는 Collections API에서 특정한 타입을 지정하지 않고 모든 객체를 저장할 수 있었다. 그러나 이로 인해 객체를 검색하거나 제거할 때 마다 타입 체크 및 형변환이 필요하다는 문제점이 있었다.
+
+예시로, JDK 1.5 이전의 코드이다.
+
+```java
+List list = new ArrayList();
+list.add("Hello"); 
+list.add(123); // 가능하지만 이후에 문제가 발생할 수 있다.
+```
+
+이 경우에, 정수와 문자열이 함께 저장되므로, 리스트에서 항목을 가져올 때 해당 항목이 문자열인지 정수인지 알 수 없어서 발생하는 문제를 해결하기 위해 제네릭이 도입되었다.
+
+
+## 제네릭을 사용하면 형변환이 필요 없다.
+
+제네릭을 사용하면 컴파일러가 명시적으로 지정된 타입만을 허용하므로, 불필요한 형변환을 피할 수 있다.
+
+
+#### jdk 1.5 이전
+```java
+List myList = new ArrayList();
+myList.add("Hello");
+String firstItem = (String) myList.get(0); // 형변환 필요함
+
+myList.add(new Integer(123));
+Integer firstNumber = (Integer) myList.get(1); // 형변환 필요함
+```
+#### jdk 1.5 이후
+```java
+List<String> stringList = new ArrayList<>();
+stringList.add("Hello");
+String firstItem = stringList.get(0); // 형변환 필요 없음
+
+List<Integer> integerList = new ArrayList<>();
+integerList.add(123);
+Integer firstNumber = integerList.get(0); // 형변환 필요 없음
+```
+
+## 제네릭을 사용하면 코드가 간졀해진다.
+
+```java
+List<String> stringList = new ArrayList<>();
+stringList.add("Hello");  // 문자열을 추가할 수 있다.
+
+List<Integer> intList = new ArrayList<>();
+intList.add(123);  // 정수를 추가할 수 있다.
+```
+
+위 코드에서 `List<T>`에서 `T`는 제네릭 타입 파라미터이다. 즉, 클래스를 선언할 때 사용되는 파라미터로, `T` 대신에 우리가 원하는 어떤 타입도 넣을 수 있다.
+
+이를 통해 하나의 코드가 다양한 타입에 대해 동작할 수 있어, 코드의 중복을 줄이고, 유연성과 재사용성을 높일 수 있다.
+
+## 제네릭 타입의 네이밍 컨벤션
+
+일반적으로 제네릭 타입 매개변수 이름은 대문자로 된 알파벳 한 글자이다. 일반적인 변수 네이밍 컨벤션과 뚜렷한 대조를 이룬다. 일반 클래스 또는 인터페이스와 제네릭 타입을 보다 명확하게 구분하기 위함이다.
+
+> E - Element (Java Collections Framework에서 주로 사용) 
+> K - Key
+> N - Number
+> T - Type
+> V - Value
+> S,U,V etc. - 2nd, 3rd, 4th types
+
+## 제네릭 타입의 제한 - Bounded Generics
+
+Bounded Generics는 제네릭 타입의 범위를 제한하는 기능이다. 제네릭 타입을 사용할 때 특정 클래스의 하위 클래스만을 허용하거나, 특정 인터페이스를 구현하는 클래스만을 허용하도록 제한할 수 있다. 이를 통해 더욱 안정적인 코드를 작성할 수 있다.
+
+예를 들어, `T extends Comparable<T>` 형태의 Bounded Generics는 T 타입이 Comparable 인터페이스를 구현한 타입, 즉 자신과 비교할 수 있는 타입만을 허용한다. 이는 코드에서 T 타입의 인스턴스를 안전하게 비교하는 것을 보장한다.
+
+Bounded Generics의 사용은 제네릭 타입의 범위를 제한하는 것이지만, 코드의 유연성과 안정성을 동시에 향상시키는 중요한 도구이다.
+
+## 공변성과 반공변성 적용하기 - Wildcard
+
+공변성은 서브 타입 관계를 의미한다. 예를 들어, Integer는 Number의 서브타입이므로 `List<Integer>`도 `List<Number>`의 서브타입이라고 할 수 있을 것 같지만, 제네릭에서는 이러한 관계가 성립하지 않다는게 주목할 지점이다.
+
+```java
+List<Integer> intList = new ArrayList<>();
+// 컴파일 에러
+List<Number> numList = intList; 
+```
+
+하지만 이런 문제를 해결하기 위해 와일드카드가 도입되었다. Upper Bounded Wildcards (`<? extends T>`)를 사용하면 T 타입 또는 그 서브타입을 허용하고, Lower Bounded Wildcards (`<? super T>`)를 사용하면 T 타입 또는 그 슈퍼타입을 허용한다. 
+
+
+```java
+List<? extends Number> numList = intList; // 가능
+```
+
+## 타입 소거 - Type Erasure
+
+타입 소거는 제네릭 코드가 실행 시에 타입 정보를 유지하지 않도록 컴파일러가 제네릭 타입을 제거하는 것을 의미한다. 이는 제네릭 코드가 non-generic 코드와 호환될 수 있도록 해준다. 
+컴파일 과정에서 타입 체크를 수행한 후에 제네릭 타입 정보를 제거하고, 필요한 곳에 형변환을 삽입한다. 이로 인해 컴파일된 바이트코드에는 제네릭 타입 정보가 포함되지 않게된다.
+
+> 타입 소거의 장점
+> 1. **호환성**: 제네릭 코드를 사용하는 새로운 코드는 non-generic 코드와 호환성을 유지할 수 있습니다. 이는 이전 버전의 Java와의 호환성을 보장한다.
+> 2. **성능**: 제네릭 타입이 런타임에 보존되지 않으므로, 제네릭이 도입되기 전과 동일한 효율적인 바이트코드를 생성할 수 있다.
+
+
+
+## 제네릭의 장점
+제네릭의 장점을 요약하면 다음과 같다. 
+
+1. **타입 안전성(Type Safety)**
+   - 제네릭을 사용하면 컴파일러가 타입을 미리 체크하므로 타입 안정성을 보장한다. 잘못된 타입 사용에 대한 런타임 오류를 컴파일 시점에 미리 방지할 수 있다.
+
+2. **타입 캐스팅(Type Casting) 감소**
+   - 제네릭을 사용하면 클래스나 메소드에 특정 타입이 지정되므로 명시적인 타입 캐스팅이 필요 없다. 이는 코드의 가독성을 높이고, 캐스팅에 따른 잠재적인 오류 가능성을 줄인다.
+
+3. **코드 재사용성(Reusability) 증가**
+   - 제네릭을 사용하면 동일한 코드를 다양한 타입에 대해 사용할 수 있다. 예를 들어, List&lt;Integer&gt;와 List&lt;String&gt;은 모두 List라는 동일한 코드를 사용하면서도 다른 타입의 데이터를 다룰 수 있다.
+
+## Ref.
+
+- [남궁성 - 자바의 정석 ch 12 지네릭스](https://youtu.be/QcXLiwZPnJQ)
+- [Generics In Java - Full Simple Tutorial](https://youtu.be/K1iu1kXkVoA)
+- [Bounded Type Parameters](https://docs.oracle.com/javase/tutorial/java/generics/bounded.html)

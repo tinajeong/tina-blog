@@ -112,7 +112,7 @@ List<? extends Number> numList = intList; // 가능
 컴파일 과정에서 타입 체크를 수행한 후에 제네릭 타입 정보를 제거하고, 필요한 곳에 형변환을 삽입한다. 이로 인해 컴파일된 바이트코드에는 제네릭 타입 정보가 포함되지 않게된다.
 
 > 타입 소거의 장점
-> 1. **호환성**: 제네릭 코드를 사용하는 새로운 코드는 non-generic 코드와 호환성을 유지할 수 있습니다. 이는 이전 버전의 Java와의 호환성을 보장한다.
+> 1. **호환성**: 제네릭 코드를 사용하는 새로운 코드는 non-generic 코드와 호환성을 유지할 수 있다. 이는 이전 버전의 Java와의 호환성을 보장한다.
 > 2. **성능**: 제네릭 타입이 런타임에 보존되지 않으므로, 제네릭이 도입되기 전과 동일한 효율적인 바이트코드를 생성할 수 있다.
 
 
@@ -123,14 +123,14 @@ List<? extends Number> numList = intList; // 가능
 1. **타입 안전성(Type Safety)**
    - 제네릭을 사용하면 컴파일러가 타입을 미리 체크하므로 타입 안정성을 보장한다. 잘못된 타입 사용에 대한 런타임 오류를 컴파일 시점에 미리 방지할 수 있다.
 
-2. **타입 캐스팅(Type Casting) 감소**
+2. **타입 캐스팅(Type Casting)가 필요하지 않다.**
    - 제네릭을 사용하면 클래스나 메소드에 특정 타입이 지정되므로 명시적인 타입 캐스팅이 필요 없다. 이는 코드의 가독성을 높이고, 캐스팅에 따른 잠재적인 오류 가능성을 줄인다.
 
-3. **코드 재사용성(Reusability) 증가**
+3. **코드 재사용성(Reusability) 증가한다.**
    - 제네릭을 사용하면 동일한 코드를 다양한 타입에 대해 사용할 수 있다. 예를 들어, List&lt;Integer&gt;와 List&lt;String&gt;은 모두 List라는 동일한 코드를 사용하면서도 다른 타입의 데이터를 다룰 수 있다.
 
 ## Ref.
 
 - [남궁성 - 자바의 정석 ch 12 지네릭스](https://youtu.be/QcXLiwZPnJQ)
 - [Generics In Java - Full Simple Tutorial](https://youtu.be/K1iu1kXkVoA)
-- [Bounded Type Parameters](https://docs.oracle.com/javase/tutorial/java/generics/bounded.html)
+- [Oracle Docs - Bounded Type Parameters](https://docs.oracle.com/javase/tutorial/java/generics/bounded.html)

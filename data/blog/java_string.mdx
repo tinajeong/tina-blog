@@ -51,21 +51,23 @@ System.out.println(str1 == str2); // true
 
 ## `"Tina"`와 `new String("Tina")`는 동일할까?
 
-**`String str = "Tina";`**은 리터럴을 사용하여 문자열을 생성했다. 리터럴 문자열은 Heap 중 특별한 메모리 영역인 String pool에 저장된다. 이 방법으로 생성된 문자열은 하나의 주소를 가리키기 때문에 메모리 효율성을 높일 수 있다.
+`String str = "Tina";`은 리터럴을 사용하여 문자열을 생성했다. 리터럴 문자열은 Heap 중 특별한 메모리 영역인 String pool에 저장된다. 이 방법으로 생성된 문자열은 하나의 주소를 가리키기 때문에 메모리 효율성을 높일 수 있다.
 
-**`String str = new String("Tina");`**은 새로운 문자열 객체를 명시적으로 생성한다(String Object). 이렇게 생성된 문자열은 일반 Heap 영역에 저장된다. **`new`** 키워드를 사용하면 항상 새로운 객체가 생성된다. **String pool에 있는 기존 "Tina" 문자열과 별개의 객체를 생성하기 때문에** 불필요한 메모리를 추가로 사용하게 된다.
+`String str = new String("Tina");는 새로운 문자열 객체를 명시적으로 생성한다(String Object). 이렇게 생성된 문자열은 일반 Heap 영역에 저장된다. **`new`** 키워드를 사용하면 항상 새로운 객체가 생성된다. **String pool에 있는 기존 "Tina" 문자열과 별개의 객체를 생성하기 때문에** 불필요한 메모리를 추가로 사용하게 된다.
 
 > String Literal과 String Object는 저장되는 공간이 다르다.
 
 ## String Concatenation
 
-`+` 연산자눈 두 문자열을 이어붙이는 가장 간단한 방법이다. 직관적이고 코딩하기 쉽지만, 문자열을 이어 붙일때마다 새로운 String 객체를 만들기 때문에 concat 연산이 많아지는 경우엔 성능 이슈를 일으킬 수 있다.
+`+` 연산자눈 두 문자열을 이어붙이는 가장 간단한 방법이다. 직관적이지만, 문자열을 이어 붙일때마다 새로운 String 객체를 만들기 때문에 concat 연산이 많아지는 경우엔 성능 이슈를 일으킬 수 있다.
 
 StringBuilder와 StringBuffer를 이용하면 보다 효율적으로 concat 연산을 할 수 있다. StringBuilder와 StringBuffer는 내부적으로 가지고 있는 문자 배열을 확장하여 문자열을 추가한다. 
 
 > StringBuffer는 thread-safe하지만, StringBuilder는 그렇지 않다.
 
-JDK 6 이전에는 `+` 연산자를 사용한 concat연산이이 많은 성능 문제를 일으켰다. 이는 `+` 연산자를 사용할 때마다 새로운 String 객체가 생성되고, 이전 객체는 가비지 컬렉션 대상이 되기 때문이다. 하지만, Java 8 이후로는 JVM이 `+` 연산자를 내부적으로 StringBuilder, StringBuffer를 이용한 테크닉을 사용하는 것으로 변환해 성능을 개선했다. 그러나 많은 수의 문자열이 반복적으로 concat 연산이 이루어 질때는, 여전히 StringBuilder나 StringBuffer를 사용하는 것이 더 효율적이다.
+### `+` 연산자는 무조건 쓰면 안되는걸까?
+
+JDK 6 이전에는 `+` 연산자를 사용한 concat연산이 많은 성능 문제를 일으켰다. 이는 `+` 연산자를 사용할 때마다 새로운 String 객체가 생성되고, 이전 객체는 가비지 컬렉션 대상이 되기 때문이다. 하지만, Java 8 이후로는 JVM이 `+` 연산자를 내부적으로 StringBuilder, StringBuffer를 이용한 테크닉을 사용하는 것으로 변환해 성능을 개선했다. 그러나 많은 수의 문자열이 반복적으로 concat 연산이 이루어 질때는, 여전히 StringBuilder나 StringBuffer를 사용하는 것이 더 효율적이다.
 
 > To increase the performance of repeated string concatenation, a Java compiler may use the StringBuffer class or a similar technique to reduce the number of intermediate String objects that are created by evaluation of an expression.
 

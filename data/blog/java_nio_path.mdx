@@ -12,19 +12,25 @@ images: ['/static/images/java.png']
 ## Java에서 파일 경로를 처리하는 방법: `File` 객체의 사용과 한계 
 
 자바 코드를 작성하다가 파일 경로를 다루는 경우는 상당히 흔하게 겪는 일이다. 보통은 이럴 때 `File` 객체를 사용해서 코드를 작성한다. 
-예를 들어, 파일의 메시지 ID를 추출하는 코드가 있다. 아래 코드는 윈도우 환경에서 잘 동작한다.
+예를 들어, 파일의 메시지 ID를 추출하는 코드가 있다. 아래 코드는 맥 환경에서 잘 동작한다.
 
 ```java
-private Optional<String> extractMessageID( File f )  
-{   
-    int startPos = 
-        f.getPath().lastIndexOf('\\');  // Windows path separator
-    int endPos = 
-        f.getPath().lastIndexOf(CharacterEnum.PERIOD.getChar() );  
-
-    if( startPos < 0 || endPos < 0 )  
-          return Optional.empty();  
-    return f.getPath().substring( startPos+1, endPos );  
+private void loadData() throws IOException
+{
+	File dir = new File(CONFIG_PATH + "/data" );
+	assertTrue(dir.isDirectory());
+	
+	File[] list = dir.listFiles();
+	if( null == list )
+		return;
+	
+	for( File f: list )
+	{
+		String dataId = extractMessageID( f );
+		String data   = readFile( f );
+		dataRepo.put( dataId, data );
+	}
+	assertEquals( dataRepo.size(), list.length );
 }
 ```
 
@@ -32,7 +38,7 @@ private Optional<String> extractMessageID( File f )
 
 ## 문제점
 
-위 예시 코드는 윈도우에서 잘 작동하지만 맥북에서 돌려보면 에러가 발생한다. 
+위 예시 코드는 맥북에서 잘 작동하지만 윈도우에서 돌려보면 에러가 발생한다. 
 왜일까? 바로 Windows와 Unix 기반 운영체제에서 `file.separator`의 값이 다르기 때문이다. `File.getPath()` 메소드는 운영체제에 따라 반환값이 달라진다.
 윈도우에서는 경로를 표현할 때 `\`를 사용하고, 맥과 리눅스에서는 `/`를 사용한다. 
 
@@ -44,31 +50,50 @@ private Optional<String> extractMessageID( File f )
 이는 현재 운영체제의 파일 경로 구분자를 반환하는 메서드로, 아래와 같이 수정하여 사용할 수 있다.
 
 ```java
-private Optional<String> extractMessageID( File f )  
-{   
-    int startPos = 
-        f.getPath().lastIndexOf(System.getProperty("file.separator"));  // 한 줄 수정하기
-    int endPos = 
-        f.getPath().lastIndexOf(CharacterEnum.PERIOD.getChar() );  
-
-    if( startPos < 0 || endPos < 0 )  
-          return Optional.empty();  
-    return f.getPath().substring( startPos+1, endPos );  
+private void loadData() throws IOException
+{
+	File dir = new File(CONFIG_PATH + System.getProperty("file.separator") +"data" );
+	assertTrue(dir.isDirectory());
+	
+	File[] list = dir.listFiles();
+	if( null == list )
+		return;
+	
+	for( File f: list )
+	{
+		String dataId = extractMessageID( f );
+		String data   = readFile( f );
+		dataRepo.put( dataId, data );
+	}
+	assertEquals( dataRepo.size(), list.length );
 }
 ```
 
 ## 방법 2 : `java.nio.file.Path` 사용하기
 
 두 번째 방법은 `java.nio.file.Path`를 사용하는 것이다. 
-nio 패키지의 Path를 사용하면 운영체제에 따른 파일 경로 구분자 식별 문제를 해결할 수 있다. 또한, `startPos`를 찾는 부분이 필요 없어져 코드가 더 간결해진다.
+nio 패키지의 Path를 사용하면 운영체제에 따른 파일 경로 구분자 식별 문제를 해결할 수 있다.
 
 ```java
-private Optional<String> extractMessageID( Path path )
+private void loadData() throws IOException
 {
-    int endPos = path.getFileName().toString().lastIndexOf( CharacterEnum.PERIOD.getChar() );
-    if( endPos < 0 )
-        return Optional.empty();
-    return Optional.of(path.getFileName().toString().substring( 0, endPos ));
+	Path dir = Paths.get(CONFIG_PATH,"data");
+	assertTrue(Files.isDirectory(dir));
+	DirectoryStream<Path> paths = Files.newDirectoryStream(dir);
+	int pathsLength = 0;
+	if( null == paths )
+		return;
+	for( Path path: paths )
+	{
+		logger.info( "FILE : [{}]", path.normalize() );
+		logger.info( "DATA : [{}]", readFile(path) );
+		logger.info( "ID   : [{}]", extractMessageID( path ) );
+		String dataId = extractMessageID( path );
+		String data   = readFile( path );
+		dataRepo.put( dataId, data );
+		pathsLength++;
+	}
+	assertEquals( dataRepo.size(), pathsLength );
 }
 ```
 

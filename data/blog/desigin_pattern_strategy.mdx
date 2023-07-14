@@ -1,0 +1,140 @@
+---
+title: ''
+thumbSrc: '/static/images/java.png'
+date: '2023-06-28'
+tags: ['design pattern', 'java']
+draft: false
+summary: '헤드퍼스트 디자인패턴 중 전략패턴 챕터를 읽고 정리합니다.'
+images: ['/static/images/weapon_switching.png']
+---
+
+
+# Ch 1. 디자인 패턴 소개와 전략 패턴
+
+---
+
+## 문제 상황 #1: 클래스를 상속받는 코드 기능추가 불편
+- 날지 못하는 오리가 아무것도 수행하지 않도록 처리 필요
+
+```java
+public abstract class Duck {
+    quack();
+    fly() {
+        sout("오리 날다"); 
+    }
+}
+
+public class NoFlydDuck implements Duck {
+    quack(){
+        sout("꽥꽥");    
+    }
+    fly() {
+        
+    }
+}
+
+```
+
+
+## 해결 시도 #1-1: 변하는 동작에 대한 인터페이스를 만들자
+
+- 공통변경 사항이 있어도 Flyable를 상속받는 클래스를 하나하나 변경해야함. (날 수 있는 오리가 48종류라면?)
+- 상속의 장점을 전혀살리지 못함. (구현을 강제하는 interface의 장점도 의미가 없는 상황)
+
+```java
+public interface Flyable {
+    fly();
+}
+
+public Duck1 implements Flyable {
+
+}
+public Duck2 implements Flyable {
+    
+}
+...
+```
+
+## 해결의 아이디어 #2 
+
+> 바뀌는 부분은 따로 뽑아서 캡슐화 한다. 그러면 나중엔 바뀌지 않는 부분에는 영향을 미치지 않고 그 부분만 고치거나 확장할 수 있다. -45p
+
+- 변하지 않는 것과 변화하는 것
+    - 오리(변하지 않는것)와 나는 행동(변하는 것)
+- OCP 원칙
+
+
+## 해결의 아이디어 #2 
+- #1-1에서 발생했던 문제를 해결하자
+    - 변하는 동작을 재사용하자.
+
+```java
+public interface FlyBehavior { 
+    fly();
+}
+public class FlyWithWings implements FlyBehavior {
+    // 날개로 난다.
+}
+public class FlyNoway implements FlyBehavior {
+    // 날 수 없다.
+}
+```
+
+
+## 해결의 아이디어 #3
+- 동작을 직접처리하지 않고 위임하자.
+    - SRP 원칙
+
+```java
+public abstract class Duck {
+    FlyBehavior flyBehavior;
+
+    public void perfomFly() {
+        flyBehavior.fly();
+    }
+}
+```
+
+
+## 해결의 아이디어 #3
+- 동작을 직접처리하지 않고 위임하자.
+    - SRP 원칙
+
+```java
+public class ReadHeadDuck extends Duck {
+    FlyBehavior flyBehavior;
+    ReadHeadDuck() {
+        flyBehavior = new FlyWithWings();
+    }
+    public void perfomFly() {
+        flyBehavior.fly();
+    }
+}
+```
+
+
+## 해결의 아이디어 #4
+- 변화하는 동작을 runtime에 바꿔보자
+    - 동작이 바뀌기 쉽다면, runtime에도 그러할 가능성이 높다.
+```java
+
+public abstract class Duck {
+    FlyBehavior flyBehavior;
+
+    public void perfomFly() {
+        flyBehavior.fly();
+    }
+
+    public changeFlyBehavior(FlyBehavior newBehavior) {
+        this.flyBehavior = newBehavior;
+    }
+}
+
+```
+
+# 전략Strategy 패턴 3줄 요약
+
+- 변화하는 여러 패턴을 분리해 전략의 모임을 만든다. _family of algorithms_
+- 전략을 직접 처리하지 않고, 전략을 위임한다.
+- 상황에 따라 동적으로 전략을 선택한다.
+
